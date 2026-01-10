@@ -25,7 +25,7 @@ from dataset.dataset import DatasetSemi
 from dataset.sampler import BatchSampler, ClassRandomSampler
 from networks.net_factory_3d import net_factory_3d
 from dataset.dataset import TwoStreamBatchSampler
-from val_3D import test_all_case
+from inference.val_3D import test_all_case
 from unet3d.losses import DiceLoss #test loss
 
 
@@ -1989,6 +1989,152 @@ class SemiSupervisedTrainer3D:
                     )
                     break
         self.tensorboard_writer.close()
+    
+    def _train_GFEL(self):
+        "General Feature Enhanced Learning"
+        print("================> Training GFEL<===============")
+        iterator = tqdm(range(self.max_epoch), ncols=70)
+        iter_each_epoch = len(self.dataloader)
+        for epoch_num in iterator:
+            for i_batch, sampled_batch in enumerate(self.dataloader):
+                volume_batch, label_batch = (
+                    sampled_batch['image'], sampled_batch['label']
+                )
+                volume_batch, label_batch = (
+                    volume_batch.to(self.device), label_batch.to(self.device)
+                )
+                noise1 = torch.clamp(
+                    torch.randn_like(volume_batch) * 0.1, 
+                    -0.2, 
+                    0.2
+                )
+                label_batch = torch.argmax(label_batch, dim=1)
+                outputs1 = self.model(volume_batch + noise1)
+                outputs_soft1 = torch.softmax(outputs1, dim=1)
+                noise2 = torch.clamp(
+                    torch.randn_like(volume_batch) * 0.1, 
+                    -0.2, 
+                    0.2
+                )
+                outputs2 = self.model2(volume_batch + noise2)
+                outputs_soft2 = torch.softmax(outputs2, dim=1)
+
+                self.consistency_weight = self._get_current_consistency_weight(
+                    self.current_iter//150
+                )
+                loss1 = 0.5 * (self.ce_loss(outputs1[:self.labeled_bs],
+                                   label_batch[:][:self.labeled_bs].long()) + 
+                               self.dice_loss(outputs_soft1[:self.labeled_bs], 
+                                             label_batch[:self.labeled_bs].\
+                                                unsqueeze(1)))
+                loss2 = 0.5 * (self.ce_loss(outputs2[:self.labeled_bs],
+                                   label_batch[:][:self.labeled_bs].long()) + 
+                               self.dice_loss(outputs_soft2[:self.labeled_bs], 
+                                             label_batch[:self.labeled_bs].\
+                                                unsqueeze(1)))
+                pseudo_outputs1 = torch.argmax(
+                    outputs_soft1[self.labeled_bs:].detach(),
+                    dim=1, keepdim=False
+                )
+                pseudo_outputs2 = torch.argmax(
+                    outputs_soft2[self.labeled_bs:].detach(),
+                    dim=1, keepdim=False
+                )
+                if self.current_iter < self.began_semi_iter:
+                    pseudo_supervision1 = torch.FloatTensor([0]).to(self.device)
+                    pseudo_supervision2 = torch.FloatTensor([0]).to(self.device)
+                else:
+                    pseudo_supervision1 = self.ce_loss(
+                        outputs1[self.labeled_bs:],
+                        pseudo_outputs2
+                    )
+                    pseudo_supervision2 = self.ce_loss(
+                        outputs2[self.labeled_bs:],
+                        pseudo_outputs1
+                    )
+                model1_loss = loss1 + self.consistency_weight *  \
+                                      pseudo_supervision1
+                model2_loss = loss2 + self.consistency_weight * \
+                                      pseudo_supervision2
+                loss = model1_loss + model2_loss 
+                self.optimizer.zero_grad()
+                self.optimizer2.zero_grad()
+
+                loss.backward()
+                self.optimizer.step()
+                self.optimizer2.step()
+                
+                self._adjust_learning_rate()
+                self.current_iter += 1
+
+                self.tensorboard_writer.add_scalar('lr', self.current_lr, 
+                                               self.current_iter)
+                self.tensorboard_writer.add_scalar(
+                'consistency_weight/consistency_weight',self.consistency_weight, 
+                self.current_iter)
+                self.tensorboard_writer.add_scalar('loss/model1_loss', model1_loss, 
+                                               self.current_iter)
+                self.tensorboard_writer.add_scalar('loss/model2_loss', model2_loss, 
+                                               self.current_iter)
+                self.logging.info(
+                'iteration %d : model1 loss : %f model2 loss : %f' % (
+                    self.current_iter,model1_loss.item(), 
+                    model2_loss.item()))
+            
+                if self.current_iter % self.show_img_freq == 0:
+                    image = volume_batch[0, 0:1, :, :, 20:61:10].permute(
+                    3, 0, 1, 2).repeat(1, 3, 1, 1)
+                    grid_image = make_grid(image, 5, normalize=True)
+                    self.tensorboard_writer.add_image('train/Image', grid_image, 
+                                                  self.current_iter)
+
+                    image = outputs_soft1[0, 0:1, :, :, 20:61:10].permute(
+                    3, 0, 1, 2).repeat(1, 3, 1, 1)
+                    grid_image = make_grid(image, 5, normalize=False)
+                    self.tensorboard_writer.add_image(
+                    'train/Model1_Predicted_label',
+                     grid_image, self.current_iter)
+
+                    image = outputs_soft2[0, 0:1, :, :, 20:61:10].permute(
+                    3, 0, 1, 2).repeat(1, 3, 1, 1)
+                    grid_image = make_grid(image, 5, normalize=False)
+                    self.tensorboard_writer.add_image('train/Model2_Predicted_label',
+                                 grid_image, self.current_iter)
+
+                    image = label_batch[0, :, :, 20:61:10].unsqueeze(
+                    0).permute(3, 0, 1, 2).repeat(1, 3, 1, 1)
+                    grid_image = make_grid(image, 5, normalize=False)
+                    self.tensorboard_writer.add_image('train/Groundtruth_label',
+                                 grid_image, self.current_iter)
+
+                if (
+                    self.current_iter > self.began_eval_iter and
+                    self.current_iter % self.val_freq == 0
+                ) or self.current_iter==20:
+                    self.evaluation(model=self.model)
+                    self.evaluation(model=self.model2,model_name='model2')
+                    self.model.train()
+                    self.model2.train()
+            
+                if self.current_iter % self.save_checkpoint_freq == 0:
+                    save_mode_path = os.path.join(
+                    self.output_folder, 'model1_iter_' + \
+                        str(self.current_iter) + '.pth')
+                    torch.save(self.model.state_dict(), save_mode_path)
+                    self.logging.info("save model1 to {}".format(save_mode_path))
+
+                    save_mode_path = os.path.join(
+                        self.output_folder, 
+                        'model2_iter_' + str(self.current_iter) + '.pth')
+                    torch.save(self.model2.state_dict(), save_mode_path)
+                    self.logging.info("save model2 to {}".format(save_mode_path))
+                if self.current_iter >= self.max_iterations:
+                    break 
+            if self.current_iter >= self.max_iterations:
+                iterator.close()
+                break
+        self.tensorboard_writer.close()
+
     def _train_CAML(self):
         "Correlation-Aware Mutual Learning"
         print("================> Training CAML<===============")

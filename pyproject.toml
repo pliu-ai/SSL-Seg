@@ -1,0 +1,29 @@
+  [build-system]
+  requires = ["setuptools>=67", "wheel"]
+  build-backend = "setuptools.build_meta"
+
+  [project]
+  name = "ssl-seg"
+  version = "0.1.0"
+  description = "Semi-supervised medical image segmentation toolkit."
+  readme = "README.md"
+  license = { text = "MIT" }
+  authors = [{ name = "Peng Liu", email = "luckiepeng@gmail.com" }]
+  requires-python = ">=3.9"
+  dependencies = [
+    "torch>=1.13",
+    "PyYAML",
+    "numpy",
+    "tqdm",
+    "tensorboardX",
+    "wandb",
+  ]
+
+  [project.optional-dependencies]
+  dev = ["pytest", "mypy", "ruff"]
+
+  [project.scripts]
+  ssl-seg-train = "ssl_seg.cli.train:main"
+
+  [tool.setuptools.packages.find]
+  where = ["src"]

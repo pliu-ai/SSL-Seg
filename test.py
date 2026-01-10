@@ -23,15 +23,11 @@ from glob import glob
 from batchgenerators.augmentations.utils import pad_nd_image
 from networks.net_factory_3d import net_factory_3d
 from batchgenerators.utilities.file_and_folder_operations import save_json
-from val_3D import test_all_case
+from inference.val_3D import test_all_case
 
 task_name_id_dict={"full":0,"spleen":1,"kidney":2,"liver":4,"pancreas":5,
                    "heart":0}
 parser = argparse.ArgumentParser()
-parser.add_argument('--config', type=str,
-                    default='test_config_new.yaml', 
-                    help='training configuration'
-)
 parser.add_argument('--gpu', type=str, default='0',help='gpu id for testing')
 parser.add_argument(
     '--model_path', type=str,

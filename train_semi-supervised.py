@@ -38,7 +38,7 @@ from utils.util import save_config
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--config', type=str,
-                    default='train_config_3d.yaml', help='training configuration')
+                    default='configs/train_config_3d.yaml', help='training configuration')
 parser.add_argument('--c', action='store_true',required=False,
                     help="[OPTIONAL] Continue training from latest checkpoint")
 

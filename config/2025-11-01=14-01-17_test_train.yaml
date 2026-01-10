@@ -1,0 +1,275 @@
+DATASET:
+  BCV:
+    class_name_list:
+    - Spleen
+    - Right_Kidney
+    - Left_Kidney
+    - Liver
+    - Pancreas
+    - Foreground
+    cut_lower: -125
+    cut_upper: 275
+    num_classes: 6
+    test_list: /projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/test.txt
+    testing_data_num: 6
+    train_list: /projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/train.txt
+    train_list_pl: /projects/weilab/liupeng/dataset/ssl_seg/Pancreas/pancreas_test.txt
+    training_data_num: 24
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+  FLARE:
+    class_name_list:
+    - Liver
+    - Kidney
+    - Spleen
+    - Pancreas
+    - Foreground
+    cut_lower: -125
+    cut_upper: 275
+    num_classes: 5
+    test_list: ../data/AbdomenCT-1K/Flare_test.txt
+    testing_data_num: 161
+    train_list: ../data/AbdomenCT-1K/Flare_train.txt
+    train_list_pl: ../data/Pancreas/pancreas_test.txt
+    training_data_num: 200
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+  FLARE_FR:
+    class_name_list:
+    - Liver
+    - Kidney
+    - Spleen
+    - Pancreas
+    - Foreground
+    cut_lower: -125
+    cut_upper: 275
+    num_classes: 5
+    test_list: ../data/AbdomenCT-1K/Flare_test_fullres.txt
+    testing_data_num: 161
+    train_list: ../data/AbdomenCT-1K/Flare_train_fullres.txt
+    train_list_pl: ../data/Pancreas/pancreas_test.txt
+    training_data_num: 200
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+  FLARE_MR:
+    class_name_list:
+    - Liver
+    - Kidney
+    - Spleen
+    - Pancreas
+    - Foreground
+    cut_lower: -125
+    cut_upper: 275
+    num_classes: 5
+    test_list: ../data/AbdomenCT-1K/Flare_test_midres.txt
+    testing_data_num: 161
+    train_list: ../data/AbdomenCT-1K/Flare_train_midres.txt
+    train_list_pl: ../data/Pancreas/pancreas_test.txt
+    training_data_num: 200
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+  LA:
+    class_name_list:
+    - LA
+    cut_lower: -200
+    cut_upper: 300
+    num_classes: 2
+    test_list: /projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_test.txt
+    testing_data_num: 20
+    train_list: /projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_train.txt
+    train_list_pl: /projects/weilab/liupeng/dataset/ssl_seg/LA/test.txt
+    training_data_num: 80
+    weights:
+    - 1.0
+  MMWHS:
+    class_name_list:
+    - MYO
+    - LA
+    - LV
+    - RA
+    - AA
+    - PA
+    - RV
+    - Foreground
+    cut_lower: -200
+    cut_upper: 300
+    num_classes: 8
+    test_list: /projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_test.txt
+    testing_data_num: 6
+    train_list: /projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_train.txt
+    train_list_pl: ../data/Pancreas/pancreas_test.txt
+    training_data_num: 14
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+    - 1.0
+  MMWHS_MR:
+    cut_lower: -1000
+    cut_upper: 1000
+    num_classes: 8
+    test_list: ../data/MMWHS_MR/test.txt
+    testing_data_num: 6
+    train_list: ../data/MMWHS_MR/train.txt
+    training_data_num: 14
+  batch_size: 2
+  cutout: true
+  edge_prob: 0.1
+  labeled_bs: 1
+  labeled_num: 8
+  labeled_num_pl: 60
+  normalization: Zscore
+  patch_size:
+  - 80
+  - 112
+  - 112
+  random_rotflip: false
+  rotate_trans: true
+  scale_trans: true
+METHOD:
+  Baseline: null
+  C3PS:
+    addition_con_list: []
+    con_list:
+    - 1
+    - 2
+    - 3
+    - 4
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    stride: 2
+  CAML: null
+  CCRPS:
+    iou_bound_high: 1.01
+    iou_bound_low: 0.1
+    patch_size_large:
+    - 128
+    - 256
+    - 256
+    stride: 2
+  CPS: null
+  CTCT:
+    accumulation_steps: null
+    amp_opt_level: O1
+    cache_mode: part
+    eval: false
+    tag: null
+    throughput: false
+    use_checkpoint: false
+    zip: true
+  CVCL:
+    addition_con_list:
+    - 8
+    con_list:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    step_save: 2
+    stride: 8
+    threshold: 0.5
+  CVCL_partial:
+    addition_con_list:
+    - 8
+    began_partial: 4000
+    con_list:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    step_save: 2
+    stride: 8
+    threshold: 0.5
+  ConNet:
+    addition_con_list:
+    - 8
+    con_list:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    stride: 2
+  DAN: null
+  EM: null
+  ICT:
+    ict_alpha: 0.2
+  MT: null
+  McNet: null
+  UAMT: null
+  URPC: null
+backbone: unet_3D_old
+backbone2: unet_3D_sr
+began_condition_iter: 3000
+began_eval_iter: 2000
+began_semi_iter: 4000
+consistency: 0.1
+consistency_rampup: 200.0
+consistency_type: mse
+continue_training: true
+continue_wandb: false
+current_iter_num: 17600
+dataset_name: LA
+deterministic: 1
+ema_decay: 0.99
+exp: test
+gpu: '0'
+initial2_lr: 0.01
+initial_lr: 0.01
+lr_scheduler_eps: 0.001
+lr_scheduler_patience: 30
+max_iterations: 20000
+method: CCRPS
+model:
+  f_maps: 16
+  final_sigmoid: false
+  in_channels: 1
+  is_segmentation: true
+  layer_order: gcr
+  name: Semi3DUNet
+  num_groups: 8
+  num_levels: 5
+  out_channels: 8
+model1_thresh: 0.9
+model2_checkpoint: /projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model2_iter_17600_dice_0.9036.pth
+model2_thresh: 0.95
+model_checkpoint: /projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model1_iter_17600_dice_0.9036.pth
+optimizer2_type: SGD
+optimizer_type: SGD
+save_checkpoint_freq: 200
+seed: 1337
+show_img_freq: 1000
+train_3D: true
+use_CAC: true
+use_PL: false
+val_freq: 400
+wandb_id: 2jkdqxmi
+weight_decay: 1.0e-05

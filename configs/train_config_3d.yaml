@@ -1,27 +1,27 @@
-exp: "large_patch_size_128_256_256" # threshhold for model1 and model2 are 0.95
-method: CSSR # use which semi-supervised method [Baseline,MT,EM,C3PS,DAN,CPS,UAMT,ConNet,McNet,CVCL,CSSR,CVCL_partial]
+exp: "test" # threshhold for model1 and model2 are 0.95
+method: CSSR # use which semi-supervised method [Baseline,MT,EM,C3PS,DAN,CPS,UAMT,ConNet,McNet,CVCL,CCRPS,CVCL_partial,CAML]
 train_3D: True # whether to train 3D models
-backbone: unet_3D_old #[unet_3D_old, McNet,unet_3D_cl, unet ]# backbone model
-backbone2: unet_3D_sr #unet_3D_condtion_decoder # backbone for second network [unet_3D_condtion_decoder,unet_3D_condtion,Unet3DConditionBottom]
-dataset_name: BCV
+backbone: unet_3D_old #[unet_3D_old, McNet,unet_3D_cl, unet, caml ]# backbone model
+backbone2: unet_3D_sr #[unet_3D_condtion_decoder] for C3PS, [unet_3D_sr] for CCRPS # backbone for second network [unet_3D_condtion_decoder,unet_3D_condtion,Unet3DConditionBottom]
+dataset_name: LA #[BCV, MMWHS, LA]
 gpu: '0'
-root_path: /mmfs1/data/liupen/project/dataset/ssl_seg/Task12_Heart
+#root_path: ../../dataset/Task012_Heart
 
 # continue training setting
 continue_wandb: False
-continue_training: False
+continue_training: True
 wandb_id: "2jkdqxmi"
-model_checkpoint: "../model/BCV_500_CVCL_partial_test_SGD_SGD/resnet_3D_cvcl/model_iter_11200_dice_0.7703.pth"
-model2_checkpoint: "../model/BCV_4_CSSR_new_large_patch_size_SGD_SGD/unet_3D_old/model2_iter_4200_dice_0.6676.pth"
+model_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model1_iter_17600_dice_0.9036.pth"
+model2_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model2_iter_17600_dice_0.9036.pth"
 
-current_iter_num: 11200
+current_iter_num: 17600
 
 # semi supervised learning setting
 began_semi_iter: 4000  #8000 #2000
 began_condition_iter: 3000 #4000
 
 # evaluation settings
-began_eval_iter: 5000 # 300
+began_eval_iter: 2000 # 300
 val_freq: 400 #200
 
 # training settings
@@ -100,14 +100,15 @@ METHOD:
     tag:
     eval: False 
     throughput: False
+  CAML:
 
 
 DATASET:
-  labeled_num: 4
+  labeled_num: 8
   labeled_num_pl: 60 # labeled number for partial labeled data
   labeled_bs: 1 #1
   batch_size: 2 #2
-  patch_size: [96,160,160] #[224, 224] #[96,112,112] # for DAN #[80,112,112] #[96,160,160]
+  patch_size: [80,112,112] #[224, 224] #[96,112,112] # for DAN #[80,112,112] #[96,160,160]
   cutout: True # do random cutout
   rotate_trans: True # do random rotate
   scale_trans: True # do random scale
@@ -118,9 +119,9 @@ DATASET:
     num_classes: 2
     class_name_list: ['LA']
     weights: [1.0]
-    train_list: "../data/LA/LA_train.txt"
-    train_list_pl: "../data/LA/LA_test.txt" # train list for partial labeled data
-    test_list: "../data/LA/LA_test.txt"
+    train_list: "/projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_train.txt"
+    train_list_pl: "/projects/weilab/liupeng/dataset/ssl_seg/LA/test.txt" # train list for partial labeled data
+    test_list: "/projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_test.txt"
     training_data_num: 80
     testing_data_num: 20
     cut_upper: 300 # 1000  200 for urpc
@@ -129,9 +130,9 @@ DATASET:
     num_classes: 8
     class_name_list: ['MYO', 'LA', 'LV', 'RA', 'AA', 'PA', 'RV','Foreground']
     weights: [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0]
-    train_list: "../data/MMWHS/train.list" #"../data/MMWHS/MMWHS_train.txt"
+    train_list: "/projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_train.txt" #"../data/MMWHS/MMWHS_train.txt"
     train_list_pl: "../data/Pancreas/pancreas_test.txt" # train list for partial labeled data
-    test_list: "../data/MMWHS/test.list" #"../data/MMWHS/MMWHS_test.txt"
+    test_list: "/projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_test.txt" #"../data/MMWHS/MMWHS_test.txt"
     training_data_num: 14
     testing_data_num: 6
     cut_upper: 300 # 1000  200 for urpc
@@ -148,9 +149,9 @@ DATASET:
     num_classes: 6
     class_name_list: ['Spleen', 'Right_Kidney', 'Left_Kidney','Liver','Pancreas','Foreground']
     weights: [1.0,1.0,1.0,1.0,1.0] #[0.2,0.2,0.2,0.1,0.3]
-    train_list: "../data/BCV/train.txt"
-    train_list_pl: "../data/Pancreas/pancreas_test.txt" # train list for partial labeled data
-    test_list: "../data/BCV/test.txt"
+    train_list: "/projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/train.txt"
+    train_list_pl: "/projects/weilab/liupeng/dataset/ssl_seg/Pancreas/pancreas_test.txt" # train list for partial labeled data
+    test_list: "/projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/test.txt"
     training_data_num: 24
     testing_data_num: 6 
     cut_upper: 275 #200
