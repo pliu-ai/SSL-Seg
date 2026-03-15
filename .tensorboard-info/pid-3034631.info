@@ -1,0 +1,10 @@
+{
+    "cache_key": "eyJhcmd1bWVudHMiOlsiLS1sb2dkaXIiLCIuLi9tb2RlbCIsIi0tcG9ydCIsIjYwMDgiXSwiY29uZmlndXJlX2t3YXJncyI6e30sIndvcmtpbmdfZGlyZWN0b3J5IjoiL3Byb2plY3RzL3dlaWxhYi9saXVwZW5nL3Byb2plY3RzL3NlbWktc2VnL1NTTC1TZWcifQ==",
+    "db": "",
+    "logdir": "../model",
+    "path_prefix": "",
+    "pid": 3034631,
+    "port": 6008,
+    "start_time": 1772423393,
+    "version": "2.19.0"
+}

@@ -184,17 +184,33 @@ class BCVDatasetCAC(dataset):
             self.con_list = con_list 
         else:
             self.con_list = range(1, self.num_class)
-        self.addi_con_list = addi_con_list
+        self.addi_con_list = addi_con_list if addi_con_list is not None else []
         if weights:
             self.weights = [weights[i-1] for i in self.con_list ]
+            self.class_sampling_weights = {
+                class_id: float(weights[class_id - 1])
+                for class_id in range(1, min(len(weights), self.num_class - 1) + 1)
+            }
         else:
             self.weights = [1]*len(self.con_list)
+            self.class_sampling_weights = {}
         with open(img_list_file, 'r') as f:
             self.img_list = [img.replace("\n","") for img in f.readlines()]
         print(f"total img:{len(self.img_list)}")
         print(f"lower:{self.lower},upper:{self.upper}")
         print(f"do affine:{self.rotate_trans}, do cutout:{self.cutout}")
         print(f"condition list:{self.con_list}")
+
+    def _weighted_sample_condition(self, candidate_conditions):
+        candidates = list(candidate_conditions)
+        if len(candidates) == 1:
+            return int(candidates[0])
+        weights = np.array(
+            [max(self.class_sampling_weights.get(int(c), 1.0), 1e-8) for c in candidates],
+            dtype=np.float64,
+        )
+        prob = weights / weights.sum()
+        return int(np.random.choice(candidates, p=prob))
 
     def __getitem__(self, index):
         if len(self.img_list[index].strip().split()) > 1:
@@ -212,6 +228,7 @@ class BCVDatasetCAC(dataset):
         
         """read image and mask"""
         if ".npy" in img_path:
+            # .npy inputs are expected to be preprocessed already (clipped/normalized).
             img_array = np.load(img_path).squeeze()
             if index < self.labeled_num:
                 mask_array = np.load(mask_path).squeeze()
@@ -435,7 +452,7 @@ class BCVDatasetCAC(dataset):
         inter_label_list = list(set(label_list) & set(self.con_list))
         if len(inter_label_list) == 0:
             inter_label_list = self.con_list
-        condition1 = np.random.choice(inter_label_list)
+        condition1 = self._weighted_sample_condition(inter_label_list)
 
         # get condition2 for all mask array2
         label_list = list(np.unique(mask_array2))
@@ -446,7 +463,7 @@ class BCVDatasetCAC(dataset):
             inter_label_list = self.con_list
         # use num_classes as conditon label to predict foreground
         inter_label_list = inter_label_list + self.addi_con_list
-        condition2 = np.random.choice(inter_label_list)
+        condition2 = self._weighted_sample_condition(inter_label_list)
 
 
         img_array = torch.FloatTensor(img_array).unsqueeze(1)

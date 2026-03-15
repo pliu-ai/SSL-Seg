@@ -4,3 +4,4 @@
 *.pyc
 train_config.yaml
 *nii.gz
+/pretrained

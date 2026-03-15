@@ -1,7 +1,5 @@
-from logging import raiseExceptions
 import os
 import sys
-from cv2 import threshold
 import yaml
 import torch
 import torch.nn as nn
@@ -10,277 +8,374 @@ from torchvision import transforms
 from torch.utils.data import DataLoader
 from torchvision.utils import make_grid
 import torch.cuda.amp as amp
+from torch.cuda.amp import GradScaler
 from tensorboardX import SummaryWriter
 import random
 import wandb
 from tqdm import tqdm
 import numpy as np
-import argparse
 from scipy.ndimage import zoom
 
-from dataset.dataset import TwoStreamBatchSampler
 from dataset.dataset_old import (BaseDataSets, RandomGenerator,
                                  TwoStreamBatchSampler)
-from trainer.semi_trainer import SemiSupervisedTrainerBase
+from dataset.dataset_2d_cac import ACDCDatasetCAC, ACDCDatasetVal
 from networks.net_factory import net_factory
-from networks.vision_transformer import SwinUnet as ViT_seg
-from config import get_config
-from arguments import Namespace
+from utils import losses, ramps
+from trainer.training_logger import TrainingLogger
+from trainer.methods.c3ps_2d import train_C3PS_2D
 
 
+PATIENTS_TO_SLICES = {
+    "ACDC": {"3": 68, "7": 136, "14": 256, "21": 396,
+             "28": 512, "35": 664, "140": 1312},
+    "Prostate": {"2": 27, "4": 53, "8": 120, "12": 179,
+                 "16": 256, "21": 312, "42": 623},
+}
 
-class SemiSupervisedTrainer2D(SemiSupervisedTrainerBase):
-    def __init__(self, config, output_folder=None, logging=None, root_path=None) -> None:
-        SemiSupervisedTrainerBase.__init__(self, config, output_folder, logging)
-        self.root_path = root_path
+
+class SemiSupervisedTrainer2D:
+    def __init__(self, config, output_folder=None, logging=None,
+                 continue_training=False) -> None:
+        self.config = config
+        self.device = torch.device(f"cuda:{config['gpu']}")
+        self.output_folder = output_folder
+        self.logging = logging
+        self.exp = config['exp']
+        self.weight_decay = config['weight_decay']
+        self.lr_scheduler_eps = config['lr_scheduler_eps']
+        self.lr_scheduler_patience = config['lr_scheduler_patience']
+        self.seed = config['seed']
+        self.initial_lr = config['initial_lr']
+        self.initial2_lr = config['initial2_lr']
+        self.model1_thresh = config['model1_thresh']
+        self.model2_thresh = config['model2_thresh']
+        self.optimizer_type = config['optimizer_type']
+        self.optimizer2_type = config['optimizer2_type']
+        self.backbone = config['backbone']
+        self.backbone2 = config['backbone2']
+        self.max_iterations = config['max_iterations']
+        self.began_semi_iter = config['began_semi_iter']
+        self.ema_decay = config['ema_decay']
+        self.began_condition_iter = config['began_condition_iter']
+        self.began_eval_iter = config['began_eval_iter']
+        self.show_img_freq = config['show_img_freq']
+        self.save_checkpoint_freq = config['save_checkpoint_freq']
+        self.val_freq = config['val_freq']
+
+        self.continue_wandb = config['continue_wandb']
+        self.continue_training = continue_training
+        self.wandb_id = config['wandb_id']
+        self.network_checkpoint = config['model_checkpoint']
+        self.network2_checkpoint = config['model2_checkpoint']
+
+        self.consistency_rampup = config['consistency_rampup']
+        self.consistency = config['consistency']
+
+        dataset = config['DATASET']
+        self.patch_size = dataset['patch_size']
+        self.labeled_num = dataset['labeled_num']
+        self.labeled_num_pl = dataset.get('labeled_num_pl', 0)
+        self.batch_size = dataset['batch_size']
+        self.labeled_bs = dataset['labeled_bs']
+        self.dataset_name = config['dataset_name']
+
+        dataset_config = dataset[self.dataset_name]
+        self.num_classes = dataset_config['num_classes']
+        self.class_name_list = dataset_config.get('class_name_list', [])
+        self.training_data_num = dataset_config['training_data_num']
+        self.testing_data_num = dataset_config['testing_data_num']
+        self.root_path = dataset_config['root_path']
+
+        self.method_name = config['method']
+        self.method_config = config['METHOD'][self.method_name]
+        self.use_CAC = config['use_CAC']
+        self.use_PL = config.get('use_PL', False)
+
+        self.ce_loss = nn.CrossEntropyLoss(ignore_index=255)
+        self.dice_loss = losses.DiceLoss(self.num_classes)
+        self.dice_loss_con = losses.DiceLoss(2)
+        self.best_performance = 0.0
+        self.best_performance2 = 0.0
+        self.current_iter = 0
+        self.model = None
+        self.model2 = None
+        self.optimizer = None
+        self.optimizer2 = None
+        self.dataset = None
         self.dataset_val = None
+        self.dataset_pl = None
+        self.dataloader = None
+        self.dataloader_pl = None
         self.dataloader_val = None
-        parser = argparse.ArgumentParser()
-        args = parser.parse_args()
-        args.cfg = "./configs/swin_tiny_patch4_window7_224_lite.yaml"
-        args.opts = None
-        args.batch_size = self.batch_size
-        args.zip = True
-        args.resume = self.continue_training
-        args.cache_mode = self.method_config['cache_mode']
-        args.accumulation_steps = self.method_config['accumulation_steps']
-        args.use_checkpoint = self.method_config['use_checkpoint']
-        args.amp_opt_level = self.method_config['amp_opt_level']
-        args.tag = self.method_config['tag']
-        args.eval = self.method_config['eval']
-        args.throughput = self.method_config['throughput']
-        for key, value in Namespace(config).__dict__.items():
-            vars(args)[key] = value
-        self.args = args
-    
-    
-    def load_checkpoint(self, fname, train=True):
-        checkpoint = torch.load(fname)
-        self.model.load_state_dict(checkpoint)
-        self.model.to(self.device)
-        
-    
-    def load_dataset(self):
-        self.dataset = BaseDataSets(base_dir=self.root_path, 
-                            split="train", num=None, 
-                            transform=transforms.Compose([
-                            RandomGenerator(self.patch_size)
-                            ]))
-        self.dataset_val = BaseDataSets(base_dir=self.root_path, split="val")
-    
-    def initialize_network(self):
-        def create_model(ema=False):
-        # Network definition
-            model = net_factory(net_type=self.backbone, in_chns=1,
-                                class_num=self.num_classes,
-                                device=self.device)
-            if ema:
-                for param in model.parameters():
-                    param.detach_()
-            return model
+        self.tensorboard_writer = None
+        self.wandb_logger = None
+        self.logger = None
+        self.max_epoch = 0
+        self.current_lr = self.initial_lr
+        self.current2_lr = self.initial2_lr
+        self.consistency_weight = 0.0
+        self.grad_scaler1 = GradScaler()
+        self.grad_scaler2 = GradScaler()
 
-        self.model = create_model()
-        config = get_config(self.args)
-        self.model2 = ViT_seg(config, img_size=self.patch_size,
-                        num_classes=self.num_classes).to(self.device)
-        self.model2.load_from(config)
-    
-    def __patients_to_slices(self,dataset, patiens_num):
-        ref_dict = None
-        if "ACDC" in dataset:
-            ref_dict = {"3": 68, "7": 136,
-                        "14": 256, "21": 396, "28": 512, "35": 664, "140": 1312}
-        elif "Prostate" in dataset:
-            ref_dict = {"2": 27, "4": 53, "8": 120,
-                        "12": 179, "16": 256, "21": 312, "42": 623}
-        elif "LA" in dataset:
-            ref_dict = {"2": 27, "4": 53, "8": 704,
-                        "12": 179, "16": 256, "21": 312, "42": 623}
-        elif "BCV" in dataset:
-            ref_dict = {"2": 27, "4": 569, "8": 704,
-                        "12": 179, "16": 256, "21": 312, "42": 623}
-        elif "MMWHS" in dataset:
-            ref_dict = {"2": 567, "4": 569, "8": 704,
-                        "12": 179, "16": 256, "21": 312, "42": 623}
+    # ------------------------------------------------------------------
+    # Initialization
+    # ------------------------------------------------------------------
+    def initialize_network(self):
+        self.model = net_factory(
+            net_type=self.backbone, in_chns=1,
+            class_num=self.num_classes, device=self.device,
+        )
+        if self.method_name in ('C3PS', 'ConNet'):
+            self.model2 = net_factory(
+                net_type=self.backbone2, in_chns=1,
+                class_num=2, device=self.device,
+            )
+            self._kaiming_normal_init_weight()
+
+    def initialize(self):
+        self.experiment_name = (
+            f"{self.dataset_name}_{self.method_name}_"
+            f"labeled{self.labeled_num}_{self.optimizer_type}_"
+            f"{self.optimizer2_type}_{self.exp}"
+        )
+        self.wandb_logger = wandb.init(
+            name=self.experiment_name,
+            project="semi-supervised-segmentation",
+            config=self.config,
+        )
+        wandb.tensorboard.patch(root_logdir=self.output_folder + '/log')
+        self.tensorboard_writer = SummaryWriter(self.output_folder + '/log')
+        self.logger = TrainingLogger(self.tensorboard_writer, self.logging)
+        self.load_dataset()
+        self.get_dataloader()
+        self.initialize_optimizer_and_scheduler()
+
+    def load_dataset(self):
+        if self.method_name in ('C3PS', 'ConNet'):
+            self.dataset = ACDCDatasetCAC(
+                base_dir=self.root_path,
+                patch_size=self.patch_size,
+                num_class=self.num_classes,
+                stride=self.method_config['stride'],
+                iou_bound=(self.method_config['iou_bound_low'],
+                           self.method_config['iou_bound_high']),
+                labeled_num=self._patients_to_slices(),
+                con_list=self.method_config['con_list'],
+                addi_con_list=self.method_config['addition_con_list'],
+            )
         else:
-            print("Error")
-        return ref_dict[str(patiens_num)]
-    
+            self.dataset = BaseDataSets(
+                base_dir=self.root_path, split='train', num=None,
+                transform=transforms.Compose([
+                    RandomGenerator(self.patch_size),
+                ]),
+            )
+        self.dataset_val = ACDCDatasetVal(base_dir=self.root_path)
+
     def get_dataloader(self):
+        labeled_slice = self._patients_to_slices()
         total_slices = len(self.dataset)
-        labeled_slice = self.__patients_to_slices(self.dataset_name, 
-                                                  self.labeled_num)
-        print("Total silices is: {}, labeled slices is: {}".format(
-            total_slices, labeled_slice))
+        print(f"Total slices: {total_slices}, labeled: {labeled_slice}")
         labeled_idxs = list(range(0, labeled_slice))
         unlabeled_idxs = list(range(labeled_slice, total_slices))
         batch_sampler = TwoStreamBatchSampler(
-            labeled_idxs, unlabeled_idxs, self.batch_size, 
-            self.batch_size-self.labeled_bs)
-        self.dataloader = DataLoader(self.dataset, batch_sampler=batch_sampler,
-                             num_workers=4, pin_memory=True, 
-                             worker_init_fn=self._worker_init_fn)
+            labeled_idxs, unlabeled_idxs,
+            self.batch_size, self.batch_size - self.labeled_bs,
+        )
+        self.dataloader = DataLoader(
+            self.dataset, batch_sampler=batch_sampler,
+            num_workers=4, pin_memory=True,
+        )
+        self.dataloader_val = DataLoader(
+            self.dataset_val, batch_size=1, shuffle=False, num_workers=1,
+        )
+        self.max_epoch = self.max_iterations // len(self.dataloader) + 1
 
-        self.dataloader_val = DataLoader(self.dataset_val, batch_size=1, 
-                                         shuffle=False,num_workers=1)
-    
-    def _test_single_volume(self, net, image, label, classes, patch_size=[256, 256]):
-        image, label = image.squeeze(0).cpu().detach(
-        ).numpy(), label.squeeze(0).cpu().detach().numpy()
-        prediction = np.zeros_like(label)
-        for ind in range(image.shape[0]):
-            slice = image[ind, :, :]
-            x, y = slice.shape[0], slice.shape[1]
-            slice = zoom(slice, (patch_size[0] / x, patch_size[1] / y), order=0)
-            input = torch.from_numpy(slice).unsqueeze(
-                0).unsqueeze(0).float().to(self.device)
-            net.eval()
-            with torch.no_grad():
-                out = torch.argmax(torch.softmax(
-                    net(input), dim=1), dim=1).squeeze(0)
-                out = out.cpu().detach().numpy()
-                pred = zoom(out, (x / patch_size[0], y / patch_size[1]), order=0)
-                prediction[ind] = pred
-        metric_list = []
-        for i in range(1, classes):
-            metric_list.append(self._calculate_metric(
-                prediction == i, label == i, cal_asd=True))
-        return metric_list
-    
-    def train(self):
-        if self.method_name=="CTCT":
-            self._train_CTCT()
-    
-    def evaluation(self, model,model_name="model"):
-        metric_list = 0.0
-        for i_batch, sampled_batch in enumerate(self.dataloader_val):
-            volume_batch, label_batch = ( 
-                    sampled_batch['image'], sampled_batch['label']
+    def _patients_to_slices(self):
+        ref = PATIENTS_TO_SLICES.get(self.dataset_name, {})
+        return ref.get(str(self.labeled_num), self.labeled_num)
+
+    def initialize_optimizer_and_scheduler(self):
+        assert self.model is not None
+        if self.optimizer_type == 'SGD':
+            self.optimizer = torch.optim.SGD(
+                self.model.parameters(), lr=self.initial_lr,
+                momentum=0.9, weight_decay=self.weight_decay,
+            )
+        else:
+            self.optimizer = torch.optim.Adam(
+                self.model.parameters(), self.initial_lr,
+                weight_decay=self.weight_decay, amsgrad=True,
+            )
+        if self.method_name in ('C3PS', 'ConNet', 'CPS', 'CTCT'):
+            if self.optimizer2_type == 'SGD':
+                self.optimizer2 = torch.optim.SGD(
+                    self.model2.parameters(), lr=self.initial2_lr,
+                    momentum=0.9, weight_decay=self.weight_decay,
                 )
-            metric_i = self._test_single_volume(model,volume_batch, 
-                                                label_batch, 
-                                                classes=self.num_classes, 
-                                                patch_size=self.patch_size)
+            else:
+                self.optimizer2 = torch.optim.Adam(
+                    self.model2.parameters(), self.initial2_lr,
+                    weight_decay=self.weight_decay, amsgrad=True,
+                )
+        self.lr_scheduler = lr_scheduler.ReduceLROnPlateau(
+            self.optimizer, mode='min', factor=0.2,
+            patience=self.lr_scheduler_patience, verbose=True,
+            threshold=self.lr_scheduler_eps, threshold_mode='abs',
+        )
+
+    # ------------------------------------------------------------------
+    # Training dispatch
+    # ------------------------------------------------------------------
+    def train(self):
+        if self.method_name == 'C3PS':
+            train_C3PS_2D(self)
+        else:
+            raise NotImplementedError(
+                f"Method {self.method_name} not yet supported in 2D trainer"
+            )
+
+    # ------------------------------------------------------------------
+    # Evaluation (slice-by-slice on full volumes)
+    # ------------------------------------------------------------------
+    def evaluation(self, model, do_condition=False, model_name="model"):
+        from medpy import metric as medpy_metric
+        model.eval()
+        metric_list = 0.0
+        for _, sampled_batch in enumerate(self.dataloader_val):
+            volume = sampled_batch['image']
+            label_vol = sampled_batch['label']
+            metric_i = self._test_single_volume(
+                model, volume, label_vol,
+                classes=self.num_classes,
+                patch_size=self.patch_size,
+                do_condition=do_condition,
+            )
             metric_list += np.array(metric_i)
         metric_list = metric_list / len(self.dataset_val)
-        for class_i in range(self.num_classes-1):
+
+        for ci in range(self.num_classes - 1):
             self.tensorboard_writer.add_scalar(
-                f'info/{model_name}_val_{class_i+1}_dice',
-                metric_list[class_i, 0], self.current_iter
+                f'info/{model_name}_val_{ci + 1}_dice',
+                metric_list[ci, 0], self.current_iter,
             )
             self.tensorboard_writer.add_scalar(
-                f'info/{model_name}_val_{class_i+1}_hd95',
-                metric_list[class_i, 1], self.current_iter
+                f'info/{model_name}_val_{ci + 1}_hd95',
+                metric_list[ci, 1], self.current_iter,
             )
-        performance = np.mean(metric_list, axis=0)[0]
-        mean_hd95 = np.mean(metric_list,axis=0)[1]
-        self.tensorboard_writer.add_scalar(f'mean/{model_name}_val_mean_dice',
-                                  performance, self.current_iter)
-        self.tensorboard_writer.add_scalar(f'mean/{model_name}_val_mean_hd',
-                                  mean_hd95, self.current_iter)
-        best_performance = self.best_performance
-        if model_name=="model2":
-            best_performance = self.best_performance2
-        if performance > best_performance:
-            if model_name == "model2":
-                self.best_performance2 = performance
+        perf = np.mean(metric_list, axis=0)[0]
+        hd95 = np.mean(metric_list, axis=0)[1]
+        self.tensorboard_writer.add_scalar(
+            f'mean/{model_name}_val_mean_dice', perf, self.current_iter,
+        )
+        self.tensorboard_writer.add_scalar(
+            f'mean/{model_name}_val_mean_hd', hd95, self.current_iter,
+        )
+        best = self.best_performance2 if do_condition else self.best_performance
+        if perf > best:
+            if do_condition:
+                self.best_performance2 = perf
             else:
-                self.best_performance = performance
-            save_mode_path = os.path.join(self.output_folder,
-                                          '{}_iter_{}_dice_{}.pth'.format(
-                                            model_name,
-                                            self.current_iter, 
-                                            round(performance, 4)))
-            save_best = os.path.join(self.output_folder,
-                                     '{}_best_{}.pth'.format(
-                                        self.backbone,model_name))
-            torch.save(model.state_dict(), save_mode_path)
-            torch.save(model.state_dict(), save_best)
-            
-        
-    def _train_CTCT(self):
-        """
-        code for "Semi-Supervised Medical Image Segmentation via Cross Teaching 
-        between CNN and Transformer"
-        """
-        print("================> Training CTCT<===============")
-        iter_num = 0
-        max_epoch = self.max_iterations // len(self.dataloader) + 1
-        iterator = tqdm(range(max_epoch), ncols=70)
-        for epoch_num in iterator:
-            for i_batch, sampled_batch in enumerate(self.dataloader):
-                self._adjust_learning_rate()
-                self.model.train()
-                self.model2.train()
-                volume_batch, label_batch = ( 
-                    sampled_batch['image'], sampled_batch['label']
-                )
-                volume_batch, label_batch = (
-                    volume_batch.to(self.device), label_batch.to(self.device)
-                )
+                self.best_performance = perf
+            path = os.path.join(
+                self.output_folder,
+                f'{model_name}_iter_{self.current_iter}_dice_{perf:.4f}.pth',
+            )
+            torch.save(model.state_dict(), path)
+            self.logging.info(f'save best {model_name} to {path}')
+        self.logging.info(
+            f'iter {self.current_iter}: {model_name}_dice={perf:.4f}, '
+            f'{model_name}_hd95={hd95:.4f}'
+        )
+        model.train()
+        return metric_list
 
-                outputs1 = self.model(volume_batch)
-                outputs_soft1 = torch.softmax(outputs1, dim=1)
+    def _test_single_volume(self, net, image, label, classes,
+                            patch_size, do_condition=False):
+        from medpy import metric as medpy_metric
+        image = image.squeeze(0).cpu().numpy()
+        label = label.squeeze(0).cpu().numpy()
+        prediction = np.zeros_like(label)
+        for ind in range(image.shape[0]):
+            sl = image[ind]
+            x, y = sl.shape
+            sl = zoom(sl, (patch_size[0] / x, patch_size[1] / y), order=0)
+            inp = torch.from_numpy(sl).unsqueeze(0).unsqueeze(0).float().to(
+                self.device)
+            net.eval()
+            with torch.no_grad():
+                if do_condition:
+                    con_preds = []
+                    for c in self.method_config['con_list']:
+                        cond = torch.FloatTensor([[c]]).to(self.device)
+                        out_c = torch.softmax(net(inp, cond), dim=1)
+                        con_preds.append(out_c[:, 1:2])
+                    stacked = torch.cat(con_preds, dim=1)
+                    bg = 1.0 - stacked.sum(dim=1, keepdim=True).clamp(0, 1)
+                    full = torch.cat([bg, stacked], dim=1)
+                    out = torch.argmax(full, dim=1).squeeze(0)
+                else:
+                    out = torch.argmax(
+                        torch.softmax(net(inp), dim=1), dim=1
+                    ).squeeze(0)
+                out = out.cpu().numpy()
+                pred = zoom(out, (x / patch_size[0], y / patch_size[1]),
+                            order=0)
+                prediction[ind] = pred
+        result = []
+        for i in range(1, classes):
+            p = (prediction == i)
+            g = (label == i)
+            if p.sum() == 0 and g.sum() == 0:
+                result.append([1.0, 0.0])
+            elif p.sum() == 0 or g.sum() == 0:
+                result.append([0.0, 100.0])
+            else:
+                result.append([
+                    medpy_metric.dc(p, g),
+                    medpy_metric.hd95(p, g),
+                ])
+        return result
 
-                outputs2 = self.model2(volume_batch)
-                outputs_soft2 = torch.softmax(outputs2, dim=1)
-                self.consistency_weight = (
-                    self._get_current_consistency_weight(self.current_iter//150)
-                )
+    # ------------------------------------------------------------------
+    # Helper methods used by C3PS training loop
+    # ------------------------------------------------------------------
+    def _get_condition(self, pred_con_list):
+        if 0 in pred_con_list:
+            pred_con_list.remove(0)
+        inter = list(set(pred_con_list) & set(self.method_config['con_list']))
+        inter += self.method_config['addition_con_list']
+        if not inter:
+            inter = self.method_config['con_list']
+        return int(np.random.choice(inter))
 
-                loss1 = 0.5 * (self.ce_loss(
-                                    outputs1[:self.labeled_bs], 
-                                    label_batch[:self.labeled_bs].long()
-                                ) + 
-                               self.dice_loss(
-                                   outputs_soft1[:self.labeled_bs], 
-                                   label_batch[:self.labeled_bs].unsqueeze(1)
-                                ))
-                loss2 = 0.5 * (self.ce_loss(
-                                    outputs2[:self.labeled_bs], 
-                                            label_batch[:self.labeled_bs].long()
-                                ) + self.dice_loss(
-                                     outputs_soft2[:self.labeled_bs], 
-                                     label_batch[:self.labeled_bs].unsqueeze(1))
-                    )
+    def _get_current_consistency_weight(self, epoch):
+        return self.consistency * ramps.sigmoid_rampup(
+            epoch, self.consistency_rampup)
 
-                pseudo_outputs1 = torch.argmax(
-                    outputs_soft1[self.labeled_bs:].detach(), dim=1, keepdim=False)
-                pseudo_outputs2 = torch.argmax(
-                    outputs_soft2[self.labeled_bs:].detach(), dim=1, keepdim=False)
+    def _adjust_learning_rate(self):
+        if self.optimizer_type == 'SGD':
+            self.current_lr = self.initial_lr * (
+                1.0 - self.current_iter / self.max_iterations) ** 0.9
+            for pg in self.optimizer.param_groups:
+                pg['lr'] = self.current_lr
+        if (self.method_name in ('C3PS', 'ConNet', 'CPS')
+                and self.optimizer2_type == 'SGD'):
+            self.current2_lr = self.initial2_lr * (
+                1.0 - self.current_iter / self.max_iterations) ** 0.9
+            for pg in self.optimizer2.param_groups:
+                pg['lr'] = self.current2_lr
 
-                pseudo_supervision1 = self.dice_loss(
-                    outputs_soft1[self.labeled_bs:], pseudo_outputs2.unsqueeze(1))
-                pseudo_supervision2 = self.dice_loss(
-                    outputs_soft2[self.labeled_bs:], pseudo_outputs1.unsqueeze(1))
+    def _kaiming_normal_init_weight(self):
+        for m in self.model2.modules():
+            if isinstance(m, nn.Conv2d):
+                torch.nn.init.kaiming_normal_(m.weight)
+            elif isinstance(m, nn.BatchNorm2d):
+                m.weight.data.fill_(1)
+                m.bias.data.zero_()
 
-                model1_loss = loss1 + self.consistency_weight * pseudo_supervision1
-                model2_loss = loss2 + self.consistency_weight * pseudo_supervision2
+    def _worker_init_fn(self, worker_id):
+        random.seed(self.seed + worker_id)
 
-                self.loss = model1_loss + model2_loss
-
-                self.optimizer.zero_grad()
-                self.optimizer2.zero_grad()
-
-                self.loss.backward()
-
-                self.optimizer.step()
-                self.optimizer2.step()
-
-                self.current_iter = self.current_iter + 1
-
-                self._add_information_to_writer()
-                if (self.current_iter > self.began_eval_iter and
-                    self.current_iter % self.val_freq == 0
-                ) or self.current_iter==20:
-                    self.evaluation(model=self.model)
-                    self.evaluation(model=self.model2, model_name="vit")
-                if self.current_iter % self.save_checkpoint_freq == 0:
-                    self._save_checkpoint()
-                if self.current_iter >= self.max_iterations:
-                    break
-            if self.current_iter >= self.max_iterations:
-                iterator.close()
-                break
-        self.tensorboard_writer.close()
-        print("*"*10,"training done!","*"*10)
+    def load_checkpoint(self, fname="latest"):
+        pass

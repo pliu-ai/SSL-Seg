@@ -157,6 +157,7 @@ class DatasetSemi(dataset):
         _,img_name = os.path.split(img_path)
         """read image and mask"""
         if ".npy" in img_name:
+            # .npy inputs are expected to be preprocessed already (clipped/normalized).
             img_array = np.load(img_path).squeeze()
             if index < self.labeled_num:
                 mask_array = np.load(mask_path).squeeze()
@@ -165,10 +166,10 @@ class DatasetSemi(dataset):
                 mask_array = np.zeros_like(img_array)   
         else:
             img_array = sitk.GetArrayFromImage(sitk.ReadImage(img_path))
-            if index < self.labeled_num:
-                mask_array = sitk.GetArrayFromImage(sitk.ReadImage(mask_path))
-            else:
-                mask_array = np.zeros_like(img_array)   
+            # if index < self.labeled_num:
+            mask_array = sitk.GetArrayFromImage(sitk.ReadImage(mask_path))
+            # else:
+            #mask_array = np.zeros_like(img_array)   
         mask_array = mask_array.astype(np.uint8)
         if self.random_rotflip:
             k = np.random.randint(0, 4)

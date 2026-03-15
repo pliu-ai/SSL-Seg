@@ -1,0 +1,85 @@
+DATASET:
+  ACDC:
+    class_name_list:
+    - RV
+    - MYO
+    - LV
+    cut_lower: -200
+    cut_upper: 300
+    num_classes: 4
+    root_path: /projects/weilab/liupeng/dataset/ssl_seg/ACDC
+    test_list: ''
+    testing_data_num: 20
+    train_list: ''
+    train_list_pl: ''
+    training_data_num: 1312
+    weights:
+    - 1.0
+    - 1.0
+    - 1.0
+  batch_size: 8
+  cutout: false
+  edge_prob: 0.0
+  labeled_bs: 4
+  labeled_num: 7
+  labeled_num_pl: 0
+  normalization: Zscore
+  patch_size:
+  - 224
+  - 224
+  random_rotflip: true
+  rotate_trans: false
+  scale_trans: false
+FP16: false
+METHOD:
+  C3PS:
+    addition_con_list:
+    - 4
+    con_list:
+    - 1
+    - 2
+    - 3
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    stride: 2
+backbone: unet
+backbone2: unet_condition
+began_condition_iter: 3000
+began_eval_iter: 500
+began_semi_iter: 4000
+consistency: 0.1
+consistency_rampup: 200.0
+consistency_type: mse
+continue_training: false
+continue_wandb: false
+current_iter_num: 0
+dataset_name: ACDC
+deterministic: 1
+ema_decay: 0.99
+exp: c3ps_2d_acdc
+gpu: '0'
+initial2_lr: 0.01
+initial_lr: 0.01
+lr_scheduler_eps: 0.001
+lr_scheduler_patience: 30
+max_iterations: 30000
+method: C3PS
+model:
+  in_channels: 1
+  name: UNet2D
+  out_channels: 4
+model1_thresh: 0.9
+model2_checkpoint: ''
+model2_thresh: 0.95
+model_checkpoint: ''
+optimizer2_type: SGD
+optimizer_type: SGD
+save_checkpoint_freq: 3000
+seed: 1337
+show_img_freq: 100
+train_3D: false
+use_CAC: true
+use_PL: false
+val_freq: 200
+wandb_id: ''
+weight_decay: 1.0e-05

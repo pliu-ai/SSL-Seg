@@ -134,6 +134,30 @@ def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2,
     return net
 
 
+def get_default_feature_layer_name_3d(net_type=""):
+    mapping = {
+        "unet_3D_old": "center",
+        "unet_3D": "center",
+        "vnet": "block_five",
+        "McNet": "block_five",
+        "unet_3D_cl": "center",
+        "unet_3D_sr": "center",
+        "caml": "block_five",
+    }
+    return mapping.get(net_type, "")
+
+
+def resolve_feature_module_3d(model, net_type=""):
+    default_name = get_default_feature_layer_name_3d(net_type)
+    named = dict(model.named_modules())
+    if default_name and default_name in named:
+        return default_name, named[default_name]
+    for name, module in reversed(list(model.named_modules())):
+        if isinstance(module, nn.Conv3d):
+            return name, module
+    return "", None
+
+
 
 
 class InitWeights_He(object):

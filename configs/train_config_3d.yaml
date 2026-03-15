@@ -1,15 +1,15 @@
-exp: "test" # threshhold for model1 and model2 are 0.95
-method: CSSR # use which semi-supervised method [Baseline,MT,EM,C3PS,DAN,CPS,UAMT,ConNet,McNet,CVCL,CCRPS,CVCL_partial,CAML]
+exp: "Adam_for_condition_model" # threshhold for model1 and model2 are 0.95
+method: C3PS # use which semi-supervised method [Baseline,MT,EM,C3PS,DAN,CPS,UAMT,ConNet,McNet,CVCL,CCRPS,CVCL_partial,CAML]
 train_3D: True # whether to train 3D models
 backbone: unet_3D_old #[unet_3D_old, McNet,unet_3D_cl, unet, caml ]# backbone model
-backbone2: unet_3D_sr #[unet_3D_condtion_decoder] for C3PS, [unet_3D_sr] for CCRPS # backbone for second network [unet_3D_condtion_decoder,unet_3D_condtion,Unet3DConditionBottom]
-dataset_name: LA #[BCV, MMWHS, LA]
+backbone2: unet_3D_condtion_decoder #[unet_3D_condtion_decoder] for C3PS, [unet_3D_sr] for CCRPS # backbone for second network [unet_3D_condtion_decoder,unet_3D_condtion,Unet3DConditionBottom]
+dataset_name: BTCV #[BCV, BTCV, MMWHS, LA]
 gpu: '0'
 #root_path: ../../dataset/Task012_Heart
 
 # continue training setting
 continue_wandb: False
-continue_training: True
+continue_training: False
 wandb_id: "2jkdqxmi"
 model_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model1_iter_17600_dice_0.9036.pth"
 model2_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model2_iter_17600_dice_0.9036.pth"
@@ -18,22 +18,26 @@ current_iter_num: 17600
 
 # semi supervised learning setting
 began_semi_iter: 4000  #8000 #2000
-began_condition_iter: 3000 #4000
+began_condition_iter: 8000 #4000
 
 # evaluation settings
 began_eval_iter: 2000 # 300
 val_freq: 400 #200
+val_sample_num: 4 # evaluate on 4 randomly sampled validation cases each validation step
+condition_eval_batch_size: 2 # number of conditions evaluated together for C3PS/ConNet model2 validation
 
 # training settings
 save_checkpoint_freq: 200
 max_iterations: 20000
+iters_per_epoch: 100
+num_epochs: 500
 use_CAC: True   # whether use Context-Aware-Consistency
 use_PL: False # whether use partial label
 deterministic: 1
 initial_lr: 0.01
-initial2_lr: 0.01 # for second network
+initial2_lr: 3.0e-4 # 0.01 # for second network
 optimizer_type: 'SGD' # ['SGD' or 'Adam']
-optimizer2_type: 'SGD' # for second network
+optimizer2_type: 'Adam' # for second network
 model1_thresh: 0.90 #threshhold for model1
 model2_thresh: 0.95 # threshhold for model2
 seed: 1337
@@ -45,6 +49,49 @@ weight_decay: 0.00001 #0.00001
 lr_scheduler_patience: 30
 lr_scheduler_eps: 0.001
 show_img_freq: 1000
+train_log_interval: 20
+dataloader_num_workers: 8
+dataloader_prefetch_factor: 2
+dataloader_persistent_workers: true
+dataloader_pin_memory: true
+
+# SAM-guided pseudo label refinement/recovery.
+sam:
+  use_sam_refinement: true
+  sam_backend: 'medsam'              # 'sam' | 'medsam'
+  sam_checkpoint: './pretrained/medsam_vit_b.pth'
+  sam_model_type: 'vit_b'            # MedSAM currently supports 'vit_b'
+  auto_download: true               # true: auto download checkpoint when missing
+  # MedSAM vit_b checkpoint (~360 MB). Override with a local mirror if Drive is slow.
+  download_url: 'https://drive.google.com/uc?id=1ARiB5RkSsWmAB_8mqWnwkjHVy46vzkhR'
+  sam_refine_interval: 20
+  use_multiplanar: true
+  use_propagation: false
+  min_component_area: 100
+  bbox_expand_ratio: 0.05
+  max_expansion_ratio: 1.5      # SAM mask area / pseudo mask area limit; >ratio → intersection fallback
+  feature_layer: ''                  # Optional teacher feature layer name for hook
+  visualize_refine: true             # visualize pseudo before/after refine
+  visualize_interval: 20            # iterations
+  visualize_case_index: 0
+  visualize_slice_strategy: 'max_change'  # 'max_change' | 'middle'
+  save_compare_npz: true
+
+  # Confidence Estimation
+  confidence_alpha: 0.5
+  confidence_temperature: 1.0
+  spatial_smooth_sigma: 2.0
+
+  # False Negative Recovery
+  use_fn_recovery: false
+  fn_recovery_start_epoch: 50
+  fn_recovery_interval: 100
+  fn_iou_threshold: 0.1
+  fn_similarity_threshold: 0.7
+  fn_consistency_slices: 3
+  prototype_update_interval: 5
+  sam_points_per_side: 32
+  sam_pred_iou_thresh: 0.86
 
 METHOD:
   ICT:
@@ -60,7 +107,7 @@ METHOD:
     stride: 2
     iou_bound_low: 0.1
     iou_bound_high: 0.9
-    con_list: [1,2,3,4] # specificy condition list
+    con_list: [1,2,3,4,5,6,7,8,9,10,11,12,13] # specificy condition list
     addition_con_list: []
   ConNet: # config for Context-Aware-Consistency
     stride: 2
@@ -104,11 +151,11 @@ METHOD:
 
 
 DATASET:
-  labeled_num: 8
+  labeled_num: 5
   labeled_num_pl: 60 # labeled number for partial labeled data
   labeled_bs: 1 #1
   batch_size: 2 #2
-  patch_size: [80,112,112] #[224, 224] #[96,112,112] # for DAN #[80,112,112] #[96,160,160]
+  patch_size: [96,160,160] #[224, 224] #[96,112,112] # for DAN #[80,112,112] #[96,160,160]
   cutout: True # do random cutout
   rotate_trans: True # do random rotate
   scale_trans: True # do random scale
@@ -156,7 +203,20 @@ DATASET:
     testing_data_num: 6 
     cut_upper: 275 #200
     cut_lower: -125 #-68
-  FLARE: # config for BCV dataset
+  BTCV: # config for BTCV dataset
+    num_classes: 14
+    class_name_list: ['Spleen', 'Right_Kidney', 'Left_Kidney', 'Gallbladder', 'Esophagus', 'Liver', 'Stomach', 'Aorta', 'Inferior_Vena_Cava', 'Portal_Vein_And_Splenic_Vein', 'Pancreas', 'Right_Adrenal_Gland', 'Left_Adrenal_Gland', 'Foreground']
+    # Class-balanced condition sampling weights from current labeled_num=5 stats
+    # (inverse-sqrt frequency with clipping for stability).
+    weights: [1,1,1,1,1,1,1,1,1,1,1,1,1] #[0.5,0.7677,0.7139,1.6265,1.9581,0.5,0.5,0.7607,1.0,1.3291,1.1455,4.1109,3.6589]
+    train_list: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/train.txt"
+    train_list_pl: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt" # train list for partial labeled data
+    test_list: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt"
+    training_data_num: 18
+    testing_data_num: 12
+    cut_upper: 275 #200
+    cut_lower: -125 #-68
+  FLARE: # config for FLARE dataset
     num_classes: 5
     weights: [1.0,1.0,1.0,1.0]
     class_name_list: ['Liver','Kidney','Spleen', 'Pancreas','Foreground']

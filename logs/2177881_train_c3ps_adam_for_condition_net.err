@@ -1,0 +1,84 @@
+cpu-bind=MASK - g006, task  0  0 [1754236]: mask 0x2fffe set
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:193: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler1 = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:194: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler2 = GradScaler()
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: luckiepeng to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /projects/weilab/liupeng/projects/semi-seg/SSL-Seg/wandb/run-20260315_150111-z4a5xcwo
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run BTCV_C3PS_labeled5_SGD_Adam_Adam_for_condition_model
+wandb: ⭐️ View project at https://wandb.ai/luckiepeng/semi-supervised-segmentation
+wandb: 🚀 View run at https://wandb.ai/luckiepeng/semi-supervised-segmentation/runs/z4a5xcwo
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:382: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:403: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler2 = GradScaler()
+/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/segment_anything/build_sam.py:105: FutureWarning: You are using `torch.load` with `weights_only=False` (the current default value), which uses the default pickle module implicitly. It is possible to construct malicious pickle data which will execute arbitrary code during unpickling (See https://github.com/pytorch/pytorch/blob/main/SECURITY.md#untrusted-models for more details). In a future release, the default value for `weights_only` will be flipped to `True`. This limits the functions that could be executed during unpickling. Arbitrary objects will no longer be allowed to be loaded via this mode unless they are explicitly allowlisted by the user via `torch.serialization.add_safe_globals`. We recommend you start setting `weights_only=True` for any use case where you don't have full control of the loaded file. Please open an issue on GitHub for any issues related to this experimental feature.
+  state_dict = torch.load(f)
+  0%|                                         | 0/500 [00:00<?, ?it/s]/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py:68: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:10<00:30, 10.22s/it][A
+ 50%|█████     | 2/4 [00:23<00:23, 11.82s/it][A
+ 75%|███████▌  | 3/4 [00:37<00:12, 12.91s/it][A
+100%|██████████| 4/4 [01:08<00:00, 20.07s/it][A100%|██████████| 4/4 [01:08<00:00, 17.11s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:08<00:25,  8.40s/it][A
+ 50%|█████     | 2/4 [00:25<00:26, 13.27s/it][A
+ 75%|███████▌  | 3/4 [00:42<00:15, 15.08s/it][A
+100%|██████████| 4/4 [01:22<00:00, 25.10s/it][A100%|██████████| 4/4 [01:22<00:00, 20.69s/it]
+  0%|                             | 1/500 [04:41<39:01:10, 281.50s/it]  0%|                             | 2/500 [06:50<26:29:40, 191.53s/it]  1%|▏                            | 3/500 [09:00<22:36:16, 163.74s/it]  1%|▏                            | 4/500 [11:10<20:44:18, 150.52s/it]  1%|▎                            | 5/500 [13:19<19:37:44, 142.76s/it]  1%|▎                            | 6/500 [15:30<19:01:40, 138.67s/it]  1%|▍                            | 7/500 [17:41<18:36:59, 135.94s/it]  2%|▍                            | 8/500 [19:52<18:22:02, 134.40s/it]  2%|▌                            | 9/500 [22:02<18:08:19, 132.99s/it]  2%|▌                           | 10/500 [24:11<17:58:20, 132.04s/it]  2%|▌                           | 11/500 [26:22<17:52:04, 131.54s/it]  2%|▋                           | 12/500 [28:32<17:46:07, 131.08s/it]  3%|▋                           | 13/500 [30:41<17:40:01, 130.60s/it]  3%|▊                           | 14/500 [32:53<17:39:33, 130.81s/it]  3%|▊                           | 15/500 [35:03<17:37:01, 130.77s/it]  3%|▉                           | 16/500 [37:13<17:32:50, 130.52s/it]  3%|▉                           | 17/500 [39:23<17:29:12, 130.34s/it]  4%|█                           | 18/500 [41:34<17:27:49, 130.44s/it]  4%|█                           | 19/500 [43:44<17:25:33, 130.42s/it]  4%|█                           | 20/500 [45:55<17:24:23, 130.55s/it]  4%|█▏                          | 21/500 [48:04<17:19:19, 130.19s/it]  4%|█▏                          | 22/500 [50:13<17:13:36, 129.74s/it]  5%|█▎                          | 23/500 [52:23<17:12:22, 129.86s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:11<00:33, 11.25s/it][A
+ 50%|█████     | 2/4 [00:23<00:23, 11.94s/it][A
+ 75%|███████▌  | 3/4 [00:44<00:16, 16.12s/it][A
+100%|██████████| 4/4 [00:56<00:00, 14.38s/it][A100%|██████████| 4/4 [00:56<00:00, 14.12s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:17<00:51, 17.14s/it][A
+ 50%|█████     | 2/4 [00:37<00:37, 18.76s/it][A
+ 75%|███████▌  | 3/4 [01:13<00:26, 26.85s/it][A
+100%|██████████| 4/4 [01:30<00:00, 23.10s/it][A100%|██████████| 4/4 [01:30<00:00, 22.72s/it]
+  5%|█▎                          | 24/500 [57:03<23:07:02, 174.84s/it]  5%|█▍                          | 25/500 [59:13<21:17:02, 161.31s/it]  5%|█▎                        | 26/500 [1:01:23<20:00:17, 151.94s/it]  5%|█▍                        | 27/500 [1:03:32<19:04:02, 145.12s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:13<00:40, 13.37s/it][A
+ 50%|█████     | 2/4 [00:32<00:33, 16.67s/it][A
+ 75%|███████▌  | 3/4 [00:44<00:14, 14.65s/it][A
+100%|██████████| 4/4 [00:59<00:00, 14.79s/it][A100%|██████████| 4/4 [00:59<00:00, 14.90s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:19<00:59, 19.98s/it][A
+ 50%|█████     | 2/4 [00:43<00:43, 21.78s/it][A
+ 75%|███████▌  | 3/4 [01:00<00:19, 19.63s/it][A
+100%|██████████| 4/4 [01:17<00:00, 18.93s/it][A100%|██████████| 4/4 [01:17<00:00, 19.49s/it]
+  6%|█▍                        | 28/500 [1:07:58<23:46:56, 181.39s/it]  6%|█▌                        | 29/500 [1:10:08<21:43:09, 166.01s/it]  6%|█▌                        | 30/500 [1:12:19<20:18:32, 155.56s/it]  6%|█▌                        | 31/500 [1:14:30<19:17:41, 148.11s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:13<00:40, 13.53s/it][A
+ 50%|█████     | 2/4 [00:30<00:30, 15.32s/it][A
+ 75%|███████▌  | 3/4 [00:51<00:18, 18.01s/it][A
+100%|██████████| 4/4 [01:06<00:00, 16.91s/it][A100%|██████████| 4/4 [01:06<00:00, 16.64s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:20<01:00, 20.16s/it][A
+ 50%|█████     | 2/4 [00:38<00:38, 19.22s/it][A
+ 75%|███████▌  | 3/4 [01:18<00:28, 28.43s/it][A
+100%|██████████| 4/4 [01:36<00:00, 24.27s/it][A100%|██████████| 4/4 [01:36<00:00, 24.00s/it]
+  6%|█▋                        | 32/500 [1:19:24<24:56:18, 191.84s/it]  7%|█▋                        | 33/500 [1:21:36<22:33:54, 173.95s/it]  7%|█▊                        | 34/500 [1:23:47<20:50:39, 161.03s/it]  7%|█▊                        | 35/500 [1:25:56<19:32:54, 151.34s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:10<00:31, 10.36s/it][A
+ 50%|█████     | 2/4 [00:26<00:27, 13.95s/it][A
+ 75%|███████▌  | 3/4 [00:39<00:13, 13.15s/it][A
+100%|██████████| 4/4 [00:51<00:00, 12.89s/it][A100%|██████████| 4/4 [00:51<00:00, 12.88s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:16<00:49, 16.66s/it][A
+ 50%|█████     | 2/4 [00:34<00:35, 17.60s/it][A
+ 75%|███████▌  | 3/4 [00:52<00:17, 17.37s/it][A
+100%|██████████| 4/4 [01:11<00:00, 18.34s/it][A100%|██████████| 4/4 [01:11<00:00, 17.96s/it]
+  7%|█▊                        | 36/500 [1:30:09<23:27:20, 181.98s/it]  7%|█▉                        | 37/500 [1:32:17<21:18:17, 165.65s/it]  8%|█▉                        | 38/500 [1:34:27<19:54:22, 155.11s/it]

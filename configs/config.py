@@ -149,6 +149,33 @@ _C.TEST = CN()
 _C.TEST.CROP = True
 
 # -----------------------------------------------------------------------------
+# SAM-guided pseudo labeling settings
+# -----------------------------------------------------------------------------
+_C.SAM = CN()
+_C.SAM.USE_SAM_REFINEMENT = False
+_C.SAM.SAM_CHECKPOINT = ''
+_C.SAM.SAM_MODEL_TYPE = 'vit_h'
+_C.SAM.SAM_BACKEND = 'sam'
+_C.SAM.SAM_REFINE_INTERVAL = 20
+_C.SAM.USE_MULTIPLANAR = True
+_C.SAM.USE_PROPAGATION = False
+_C.SAM.MIN_COMPONENT_AREA = 100
+_C.SAM.BBOX_EXPAND_RATIO = 0.1
+_C.SAM.FEATURE_LAYER = ''
+_C.SAM.CONFIDENCE_ALPHA = 0.5
+_C.SAM.CONFIDENCE_TEMPERATURE = 1.0
+_C.SAM.SPATIAL_SMOOTH_SIGMA = 2.0
+_C.SAM.USE_FN_RECOVERY = False
+_C.SAM.FN_RECOVERY_START_EPOCH = 50
+_C.SAM.FN_RECOVERY_INTERVAL = 100
+_C.SAM.FN_IOU_THRESHOLD = 0.1
+_C.SAM.FN_SIMILARITY_THRESHOLD = 0.7
+_C.SAM.FN_CONSISTENCY_SLICES = 3
+_C.SAM.PROTOTYPE_UPDATE_INTERVAL = 5
+_C.SAM.SAM_POINTS_PER_SIDE = 32
+_C.SAM.SAM_PRED_IOU_THRESH = 0.86
+
+# -----------------------------------------------------------------------------
 # Misc
 # -----------------------------------------------------------------------------
 # Mixed precision opt level, if O0, no amp is used ('O0', 'O1', 'O2')

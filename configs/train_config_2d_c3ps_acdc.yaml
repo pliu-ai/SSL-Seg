@@ -1,0 +1,84 @@
+exp: "c3ps_2d_acdc"
+method: C3PS
+train_3D: False
+backbone: unet
+backbone2: unet_condition
+dataset_name: ACDC
+gpu: '0'
+FP16: False
+
+# continue training setting
+continue_wandb: False
+continue_training: False
+wandb_id: ""
+model_checkpoint: ""
+model2_checkpoint: ""
+current_iter_num: 0
+
+# semi supervised learning setting
+began_semi_iter: 4000
+began_condition_iter: 3000
+
+# evaluation settings
+began_eval_iter: 500
+val_freq: 200
+
+# training settings
+max_iterations: 30000
+use_CAC: True
+use_PL: False
+deterministic: 1
+initial_lr: 0.01
+initial2_lr: 0.01
+optimizer_type: 'SGD'
+optimizer2_type: 'SGD'
+model1_thresh: 0.90
+model2_thresh: 0.95
+seed: 1337
+ema_decay: 0.99
+consistency_type: mse
+consistency: 0.1
+consistency_rampup: 200.0
+weight_decay: 0.00001
+lr_scheduler_patience: 30
+lr_scheduler_eps: 0.001
+show_img_freq: 100
+save_checkpoint_freq: 3000
+
+METHOD:
+  C3PS:
+    stride: 2
+    iou_bound_low: 0.1
+    iou_bound_high: 0.9
+    con_list: [1, 2, 3]
+    addition_con_list: [4]
+
+DATASET:
+  labeled_num: 7
+  labeled_num_pl: 0
+  labeled_bs: 4
+  batch_size: 8
+  patch_size: [224, 224]
+  cutout: False
+  rotate_trans: False
+  scale_trans: False
+  random_rotflip: True
+  edge_prob: 0.0
+  normalization: 'Zscore'
+  ACDC:
+    num_classes: 4
+    class_name_list: ['RV', 'MYO', 'LV']
+    training_data_num: 1312
+    testing_data_num: 20
+    root_path: "/projects/weilab/liupeng/dataset/ssl_seg/ACDC"
+    cut_upper: 300
+    cut_lower: -200
+    weights: [1.0, 1.0, 1.0]
+    train_list: ""
+    train_list_pl: ""
+    test_list: ""
+
+model:
+  name: UNet2D
+  in_channels: 1
+  out_channels: 4

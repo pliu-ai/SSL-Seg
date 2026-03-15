@@ -1,5 +1,6 @@
 import os
 import math
+from contextlib import nullcontext
 from glob import glob
 
 import h5py
@@ -17,6 +18,12 @@ from monai.transforms import Compose,LoadImage,ToTensor
 from monai.metrics import DiceMetric
 from batchgenerators.utilities.file_and_folder_operations import load_pickle,join
 from nnunetv2.imageio.simpleitk_reader_writer import SimpleITKIO
+
+
+def _autocast_inference_context(device):
+    if device.type == "cuda":
+        return torch.autocast(device_type="cuda", dtype=torch.float16)
+    return nullcontext()
 
 def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1, 
                      condition=-1, do_SR=False, method='regular', return_scoremap=False):
@@ -75,7 +82,7 @@ def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1,
                 else:
                     test_patch = torch.from_numpy(test_patch).to(device)
 
-                with torch.no_grad():
+                with torch.inference_mode(), _autocast_inference_context(device):
                     if condition>0:
                         condition = torch.tensor([condition],dtype=torch.long, device=device)
                         pred1 = net(test_patch, condition)
@@ -85,7 +92,7 @@ def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1,
                             pred1 = pred1[0]
                     # ensemble
                     pred = torch.softmax(pred1, dim=1)
-                pred = pred.cpu().data.numpy()
+                pred = pred.detach().cpu().numpy()
                 pred = pred[0, :, :, :, :]
                 score_map[:, xs:xs+patch_size[0], ys:ys+patch_size[1], zs:zs+patch_size[2]] \
                     = score_map[:, xs:xs+patch_size[0], ys:ys+patch_size[1], zs:zs+patch_size[2]] + pred
@@ -105,6 +112,122 @@ def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1,
     else:
         return label_map
 
+
+def test_single_case_condition_batched(
+    net,
+    image,
+    stride_xy,
+    stride_z,
+    patch_size,
+    conditions,
+    do_SR=False,
+    return_scoremap=False,
+):
+    w, h, d = image.shape
+    device = next(net.parameters()).device
+    add_pad = False
+    if w < patch_size[0]:
+        w_pad = patch_size[0] - w
+        add_pad = True
+    else:
+        w_pad = 0
+    if h < patch_size[1]:
+        h_pad = patch_size[1] - h
+        add_pad = True
+    else:
+        h_pad = 0
+    if d < patch_size[2]:
+        d_pad = patch_size[2] - d
+        add_pad = True
+    else:
+        d_pad = 0
+
+    wl_pad, wr_pad = w_pad // 2, w_pad - w_pad // 2
+    hl_pad, hr_pad = h_pad // 2, h_pad - h_pad // 2
+    dl_pad, dr_pad = d_pad // 2, d_pad - d_pad // 2
+    if add_pad:
+        image = np.pad(
+            image,
+            [(wl_pad, wr_pad), (hl_pad, hr_pad), (dl_pad, dr_pad)],
+            mode='constant',
+            constant_values=0,
+        )
+    ww, hh, dd = image.shape
+
+    sx = math.ceil((ww - patch_size[0]) / stride_xy) + 1
+    sy = math.ceil((hh - patch_size[1]) / stride_xy) + 1
+    sz = math.ceil((dd - patch_size[2]) / stride_z) + 1
+    print(
+        f"condition batch eval, img shape:{image.shape}, "
+        f"sx:{sx}, sy:{sy}, sz:{sz}, num_conditions:{len(conditions)}"
+    )
+
+    score_map = np.zeros((len(conditions), 2) + image.shape, dtype=np.float32)
+    cnt = np.zeros(image.shape, dtype=np.float32)
+    condition_batch = torch.as_tensor(conditions, dtype=torch.long, device=device)
+
+    for x in range(0, sx):
+        xs = min(stride_xy * x, ww - patch_size[0])
+        for y in range(0, sy):
+            ys = min(stride_xy * y, hh - patch_size[1])
+            for z in range(0, sz):
+                zs = min(stride_z * z, dd - patch_size[2])
+                test_patch = image[
+                    xs:xs + patch_size[0],
+                    ys:ys + patch_size[1],
+                    zs:zs + patch_size[2],
+                ]
+                test_patch = np.expand_dims(np.expand_dims(
+                    test_patch, axis=0
+                ), axis=0).astype(np.float32)
+                patch_tensor = torch.from_numpy(test_patch).to(device)
+                if do_SR:
+                    patch_tensor = F.interpolate(
+                        patch_tensor, size=(96, 160, 160), mode='trilinear'
+                    )
+                patch_batch = patch_tensor.repeat(len(conditions), 1, 1, 1, 1)
+
+                with torch.inference_mode(), _autocast_inference_context(device):
+                    pred = net(patch_batch, condition_batch)
+                    if isinstance(pred, (tuple, list)):
+                        pred = pred[0]
+                    pred = torch.softmax(pred, dim=1).cpu().numpy()
+
+                score_map[
+                    :,
+                    :,
+                    xs:xs + patch_size[0],
+                    ys:ys + patch_size[1],
+                    zs:zs + patch_size[2],
+                ] += pred
+                cnt[
+                    xs:xs + patch_size[0],
+                    ys:ys + patch_size[1],
+                    zs:zs + patch_size[2],
+                ] += 1
+
+    score_map = score_map / cnt[None, None, ...]
+    label_map = np.argmax(score_map, axis=1)
+
+    if add_pad:
+        label_map = label_map[
+            :,
+            wl_pad:wl_pad + w,
+            hl_pad:hl_pad + h,
+            dl_pad:dl_pad + d,
+        ]
+        score_map = score_map[
+            :,
+            :,
+            wl_pad:wl_pad + w,
+            hl_pad:hl_pad + h,
+            dl_pad:dl_pad + d,
+        ]
+
+    if return_scoremap:
+        return label_map, score_map
+    return label_map
+
 def process_fn(seg_prob_tuple, window_data, importance_map_):
     """seg_prob_tuple, importance_map = 
     process_fn(seg_prob_tuple, window_data, importance_map_)
@@ -122,7 +245,7 @@ def test_single_case_monai(net, image, patch_size, overlap=0.5,batch_size=2,
     image = torch.from_numpy(image).unsqueeze(0).unsqueeze(0).to(device)
     if do_SR:
         image = F.interpolate(image, size=patch_size, mode='trilinear')
-    with torch.no_grad():
+    with torch.inference_mode(), _autocast_inference_context(device):
         prediction = sliding_window_inference(
                     image.float(),patch_size,batch_size,net,overlap=overlap,
                     mode='gaussian',process_fn=process_fn
@@ -160,8 +283,12 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
                         cut_lower=-68,
                         con_list=None,
                         normalization='Zscore',
-                        test_all_cases=False):
-    if os.path.isdir(test_list):
+                        test_all_cases=False,
+                        selected_cases=None,
+                        condition_batch_size=1):
+    if selected_cases is not None:
+        image_list = list(selected_cases)
+    elif os.path.isdir(test_list):
         image_list = glob(test_list+"*.nii.gz")
     else:
         with open(test_list, 'r') as f:
@@ -177,8 +304,10 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
     else:
         condition_list = [i for i in range(1,num_classes)]
     #shuffle(condition_list)
-    shuffle(image_list)
-    if not do_condition:
+    if selected_cases is None:
+        shuffle(image_list)
+        test_num = min(int(test_num), len(image_list))
+    else:
         test_num = len(image_list)
     if "Flare" in test_list:
         #for flare data, randomly select 10 cases for validatation
@@ -187,6 +316,8 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
             test_num = 5
         if do_condition:
             test_num = 6
+    if selected_cases is not None:
+        test_num = len(image_list)
     if test_all_cases:
         test_num = len(image_list)
     for i, image_path in enumerate(tqdm(image_list)):
@@ -225,17 +356,27 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
                 image = (image - image.mean()) / image.std()
         if do_condition:
             print(f"===>test image:{image_path}")
-            for condition in condition_list:
-                prediction = test_single_case(
-                    net, image, stride_xy, stride_z, patch_size, 
-                    num_classes=2, condition=condition, method=method)
-                if cal_metric:
-                    if condition<num_classes:
-                        metric = calculate_metric(label==condition, prediction)
-                    else:
-                        metric = calculate_metric(label>0, prediction)
-                    print(f"condition:{condition}, metric:{metric}")
-                    total_metric[condition-1, :] += metric
+            condition_batch_size = max(1, int(condition_batch_size))
+            for start_idx in range(0, len(condition_list), condition_batch_size):
+                condition_chunk = condition_list[start_idx:start_idx + condition_batch_size]
+                predictions = test_single_case_condition_batched(
+                    net,
+                    image,
+                    stride_xy,
+                    stride_z,
+                    patch_size,
+                    conditions=condition_chunk,
+                    do_SR=do_SR,
+                )
+                for chunk_idx, condition in enumerate(condition_chunk):
+                    prediction = predictions[chunk_idx]
+                    if cal_metric:
+                        if condition < num_classes:
+                            metric = calculate_metric(label == condition, prediction)
+                        else:
+                            metric = calculate_metric(label > 0, prediction)
+                        print(f"condition:{condition}, metric:{metric}")
+                        total_metric[condition - 1, :] += metric
         else:
             if do_SR:
                 prediction = test_single_case(
@@ -274,5 +415,3 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
         return total_metric[[con-1 for con in con_list]] / test_num
     else:
         return total_metric / test_num
-
-
