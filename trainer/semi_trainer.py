@@ -186,7 +186,11 @@ class SemiSupervisedTrainerBase:
                 self._kaiming_normal_init_weight()
         elif self.method_name in ['C3PS','ConNet']:
             self.model2 = net_factory_3d(
-                self.backbone2, in_chns=1, class_num=2,device=self.device
+                self.backbone2, in_chns=1, class_num=2, device=self.device,
+                num_conditions=self.num_classes,
+                embed_dim=self.method_config.get('embed_dim', 8),
+                condition_mode=self.method_config.get('condition_mode', 'concat'),
+                cond_dim=self.method_config.get('cond_dim', 32),
             )
             if self.continue_training:
                 model2_state_dict = torch.load(self.network2_checkpoint)

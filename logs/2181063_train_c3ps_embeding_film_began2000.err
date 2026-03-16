@@ -1,0 +1,35 @@
+cpu-bind=MASK - g006, task  0  0 [2289556]: mask 0x6fffc00000000 set
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:193: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler1 = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:194: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler2 = GradScaler()
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: luckiepeng to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: creating run
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /projects/weilab/liupeng/projects/semi-seg/SSL-Seg/wandb/run-20260316_121022-itkxmom2
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run BTCV_C3PS_labeled5_SGD_SGD_cond_mode_film_began_semi2000_con4000
+wandb: ⭐️ View project at https://wandb.ai/luckiepeng/semi-supervised-segmentation
+wandb: 🚀 View run at https://wandb.ai/luckiepeng/semi-supervised-segmentation/runs/itkxmom2
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:386: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:407: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler2 = GradScaler()
+/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+  0%|                                         | 0/500 [00:00<?, ?it/s]/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py:68: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:10<00:30, 10.21s/it][A
+ 50%|█████     | 2/4 [00:23<00:23, 11.86s/it][A
+ 75%|███████▌  | 3/4 [00:37<00:12, 12.94s/it][A
+100%|██████████| 4/4 [01:10<00:00, 21.04s/it][A100%|██████████| 4/4 [01:10<00:00, 17.73s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:08<00:24,  8.02s/it][A
+ 50%|█████     | 2/4 [00:23<00:24, 12.44s/it][A
+ 75%|███████▌  | 3/4 [00:39<00:14, 14.09s/it][A
+100%|██████████| 4/4 [01:17<00:00, 23.53s/it][A100%|██████████| 4/4 [01:17<00:00, 19.40s/it]
+  0%|                             | 1/500 [04:37<38:30:38, 277.83s/it]  0%|                             | 2/500 [06:46<26:15:49, 189.86s/it]  1%|▏                            | 3/500 [08:55<22:22:33, 162.08s/it]  1%|▏                            | 4/500 [11:03<20:30:38, 148.87s/it]  1%|▎                            | 5/500 [13:11<19:24:12, 141.12s/it]  1%|▎                            | 6/500 [15:20<18:48:19, 137.04s/it]

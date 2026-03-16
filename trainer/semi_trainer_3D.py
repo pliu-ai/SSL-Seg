@@ -232,7 +232,11 @@ class SemiSupervisedTrainer3D:
             self._kaiming_normal_init_weight()
         elif self.method_name in ['C3PS','ConNet']:
             self.model2 = net_factory_3d(
-                self.backbone2, in_chns=1, class_num=2,device=self.device
+                self.backbone2, in_chns=1, class_num=2, device=self.device,
+                num_conditions=self.num_classes,
+                embed_dim=self.method_config.get('embed_dim', 8),
+                condition_mode=self.method_config.get('condition_mode', 'concat'),
+                cond_dim=self.method_config.get('cond_dim', 32),
             )
             self._kaiming_normal_init_weight()
         elif self.method_name == 'CSSR':
@@ -568,10 +572,12 @@ class SemiSupervisedTrainer3D:
             best_performance = avg_metric[:, 0].mean()
             if do_condition:
                 self.best_performance2 = best_performance
+                save_only = 'model2'
             else:
                 self.best_performance = best_performance
+                save_only = 'model1'
             save_name = f'iter_{self.current_iter}_dice_{round(best_performance,4)}'
-            self._save_checkpoint(save_name)
+            self._save_checkpoint(save_name, only=save_only)
 
         self.tensorboard_writer.add_scalar(f'info/{model_name}_val_dice_score',
                         avg_metric[:, 0].mean(), self.current_iter)
@@ -894,7 +900,8 @@ class SemiSupervisedTrainer3D:
     def _worker_init_fn(self, worker_id):
         random.seed(self.seed + worker_id)     
         
-    def _save_checkpoint(self, filename: str = "latest") -> None:
+    def _save_checkpoint(self, filename: str = "latest", only: str = None) -> None:
+        """Save checkpoint. *only* can be ``'model1'``, ``'model2'``, or None (both)."""
         self.ckpt_manager.save(
             filename=filename,
             model=self.model,
@@ -905,6 +912,7 @@ class SemiSupervisedTrainer3D:
             model2=self.model2,
             optimizer2=getattr(self, 'optimizer2', None),
             grad_scaler2=self.grad_scaler2,
+            only=only,
         )
     
     

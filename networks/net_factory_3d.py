@@ -28,9 +28,11 @@ from monai.networks.nets import UNet
 from networks.PlaninUNet_sr import PlainConvUNetSR
 from networks.CAML import CAML3d_v1
 
-def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2, 
+def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2,
                    model_config=None, device=None, condition_noise=False,
-                   large_patch_size=(108,208,288)):
+                   large_patch_size=(108,208,288),
+                   num_conditions=None, embed_dim=8,
+                   condition_mode='concat', cond_dim=32):
     if net_type == "unet_3D":
         model_config['out_channels'] = class_num
         net = get_model(model_config)
@@ -61,15 +63,21 @@ def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2,
         print(f"net:{net}")
     elif net_type == "unet_3D_condition":
         net = unet_3D_Condition(
-            n_classes=class_num, in_channels=in_chns
+            n_classes=class_num, in_channels=in_chns,
+            num_conditions=num_conditions, embed_dim=embed_dim,
+            condition_mode=condition_mode, cond_dim=cond_dim,
         ).to(device)
     elif net_type == "unet_3D_condtion_decoder":
         net = Unet3DConditionDecoder(
-            n_classes=class_num, in_channels=in_chns, condition_noise=condition_noise
+            n_classes=class_num, in_channels=in_chns,
+            num_conditions=num_conditions, embed_dim=embed_dim,
+            condition_mode=condition_mode, cond_dim=cond_dim,
         ).to(device)
     elif net_type == "Unet3DConditionBottom":
         net = Unet3DConditionBottom(
-            n_classes=class_num, in_channels=in_chns
+            n_classes=class_num, in_channels=in_chns,
+            num_conditions=num_conditions, embed_dim=embed_dim,
+            condition_mode=condition_mode, cond_dim=cond_dim,
         ).to(device)
     elif net_type == "DAN":
         net = FC3DDiscriminator(num_classes=class_num).to(device)

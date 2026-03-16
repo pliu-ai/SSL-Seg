@@ -54,19 +54,26 @@ class CheckpointManager:
         model2=None,
         optimizer2=None,
         grad_scaler2=None,
+        only: str = None,
     ) -> None:
-        """Save full checkpoint for model1 (and model2 if provided)."""
-        checkpoint1 = {
-            'network_weights': model.state_dict(),
-            'optimizer_state': optimizer.state_dict(),
-            'grad_scaler_state': grad_scaler.state_dict() if grad_scaler is not None else None,
-            'current_iter': current_iter + 1,
-            'wandb_id': wandb_id,
-        }
-        path1 = join(self._output_folder, f"model1_{filename}.pth")
-        torch.save(checkpoint1, path1)
+        """Save full checkpoint for model1 and/or model2.
 
-        if model2 is not None:
+        Args:
+            only: If ``'model1'`` or ``'model2'``, save only that model.
+                  If *None* (default), save both.
+        """
+        if only is None or only == 'model1':
+            checkpoint1 = {
+                'network_weights': model.state_dict(),
+                'optimizer_state': optimizer.state_dict(),
+                'grad_scaler_state': grad_scaler.state_dict() if grad_scaler is not None else None,
+                'current_iter': current_iter + 1,
+                'wandb_id': wandb_id,
+            }
+            path1 = join(self._output_folder, f"model1_{filename}.pth")
+            torch.save(checkpoint1, path1)
+
+        if model2 is not None and (only is None or only == 'model2'):
             checkpoint2 = {
                 'network_weights': model2.state_dict(),
                 'optimizer_state': optimizer2.state_dict(),
