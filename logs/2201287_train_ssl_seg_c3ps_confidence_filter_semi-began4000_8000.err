@@ -1,0 +1,111 @@
+cpu-bind=MASK - g004, task  0  0 [3740453]: mask 0x2fffe00000000 set
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:198: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler1 = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:199: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler2 = GradScaler()
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: luckiepeng to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /projects/weilab/liupeng/projects/semi-seg/SSL-Seg/wandb/run-20260321_162743-nravep7q
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run BTCV_C3PS_labeled5_SGD_SGD_c3ps_confidence_filter_semi-began4000_8000
+wandb: ⭐️ View project at https://wandb.ai/luckiepeng/semi-supervised-segmentation
+wandb: 🚀 View run at https://wandb.ai/luckiepeng/semi-supervised-segmentation/runs/nravep7q
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:401: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler()
+/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:422: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler2 = GradScaler()
+/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+  0%|                                         | 0/500 [00:00<?, ?it/s]/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py:73: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:10<00:30, 10.06s/it][A
+ 50%|█████     | 2/4 [00:22<00:23, 11.66s/it][A
+ 75%|███████▌  | 3/4 [00:36<00:12, 12.73s/it][A
+100%|██████████| 4/4 [01:09<00:00, 20.53s/it][A100%|██████████| 4/4 [01:09<00:00, 17.34s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:08<00:24,  8.02s/it][A
+ 50%|█████     | 2/4 [00:23<00:24, 12.43s/it][A
+ 75%|███████▌  | 3/4 [00:39<00:14, 14.05s/it][A
+100%|██████████| 4/4 [01:17<00:00, 23.59s/it][A100%|██████████| 4/4 [01:17<00:00, 19.43s/it]
+  0%|                             | 1/500 [04:36<38:20:15, 276.58s/it]  0%|                             | 2/500 [06:43<26:07:08, 188.81s/it]  1%|▏                            | 3/500 [08:52<22:16:17, 161.32s/it]  1%|▏                            | 4/500 [11:00<20:25:03, 148.19s/it]  1%|▎                            | 5/500 [13:09<19:25:20, 141.25s/it]  1%|▎                            | 6/500 [15:20<18:53:37, 137.69s/it]  1%|▍                            | 7/500 [17:27<18:21:55, 134.11s/it]  2%|▍                            | 8/500 [19:37<18:09:11, 132.83s/it]  2%|▌                            | 9/500 [21:45<17:54:35, 131.32s/it]  2%|▌                           | 10/500 [23:53<17:45:36, 130.48s/it]  2%|▌                           | 11/500 [26:01<17:36:12, 129.60s/it]  2%|▋                           | 12/500 [28:08<17:28:11, 128.88s/it]  3%|▋                           | 13/500 [30:18<17:29:06, 129.25s/it]  3%|▊                           | 14/500 [32:27<17:26:06, 129.15s/it]  3%|▊                           | 15/500 [34:37<17:24:53, 129.26s/it]  3%|▉                           | 16/500 [36:43<17:16:08, 128.45s/it]  3%|▉                           | 17/500 [38:49<17:07:37, 127.65s/it]  4%|█                           | 18/500 [40:55<17:02:35, 127.29s/it]  4%|█                           | 19/500 [43:04<17:03:34, 127.68s/it]  4%|█                           | 20/500 [45:14<17:06:51, 128.36s/it]  4%|█▏                          | 21/500 [47:22<17:04:06, 128.28s/it]  4%|█▏                          | 22/500 [49:31<17:03:51, 128.52s/it]  5%|█▎                          | 23/500 [51:41<17:03:55, 128.80s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:13<00:39, 13.10s/it][A
+ 50%|█████     | 2/4 [00:27<00:27, 13.87s/it][A
+ 75%|███████▌  | 3/4 [00:48<00:17, 17.11s/it][A
+100%|██████████| 4/4 [01:03<00:00, 16.24s/it][A100%|██████████| 4/4 [01:03<00:00, 15.85s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:16<00:48, 16.22s/it][A
+ 50%|█████     | 2/4 [00:34<00:34, 17.17s/it][A
+ 75%|███████▌  | 3/4 [01:10<00:26, 26.18s/it][A
+100%|██████████| 4/4 [01:27<00:00, 22.31s/it][A100%|██████████| 4/4 [01:27<00:00, 21.84s/it]
+  5%|█▎                          | 24/500 [56:20<23:00:59, 174.07s/it]  5%|█▍                          | 25/500 [58:30<21:13:24, 160.85s/it]  5%|█▎                        | 26/500 [1:00:39<19:53:30, 151.08s/it]  5%|█▍                        | 27/500 [1:02:46<18:55:11, 144.00s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:14<00:42, 14.28s/it][A
+ 50%|█████     | 2/4 [00:34<00:35, 17.89s/it][A
+ 75%|███████▌  | 3/4 [00:47<00:15, 15.70s/it][A
+100%|██████████| 4/4 [01:03<00:00, 15.85s/it][A100%|██████████| 4/4 [01:03<00:00, 15.96s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:18<00:56, 18.88s/it][A
+ 50%|█████     | 2/4 [00:40<00:41, 20.60s/it][A
+ 75%|███████▌  | 3/4 [00:56<00:18, 18.54s/it][A
+100%|██████████| 4/4 [01:12<00:00, 17.53s/it][A100%|██████████| 4/4 [01:12<00:00, 18.19s/it]
+  6%|█▍                        | 28/500 [1:07:13<23:42:06, 180.78s/it]  6%|█▌                        | 29/500 [1:09:19<21:31:51, 164.57s/it]  6%|█▌                        | 30/500 [1:11:31<20:11:49, 154.70s/it]  6%|█▌                        | 31/500 [1:13:40<19:09:26, 147.05s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:14<00:43, 14.37s/it][A
+ 50%|█████     | 2/4 [00:32<00:32, 16.33s/it][A
+ 75%|███████▌  | 3/4 [00:54<00:19, 19.24s/it][A
+100%|██████████| 4/4 [01:10<00:00, 18.03s/it][A100%|██████████| 4/4 [01:10<00:00, 17.73s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:18<00:56, 18.98s/it][A
+ 50%|█████     | 2/4 [00:36<00:36, 18.00s/it][A
+ 75%|███████▌  | 3/4 [01:13<00:26, 26.70s/it][A
+100%|██████████| 4/4 [01:29<00:00, 22.54s/it][A100%|██████████| 4/4 [01:29<00:00, 22.38s/it]
+  6%|█▋                        | 32/500 [1:18:29<24:37:54, 189.47s/it]  7%|█▋                        | 33/500 [1:20:40<22:18:28, 171.97s/it]  7%|█▊                        | 34/500 [1:22:50<20:38:33, 159.47s/it]  7%|█▊                        | 35/500 [1:24:58<19:21:44, 149.90s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:12<00:37, 12.65s/it][A
+ 50%|█████     | 2/4 [00:31<00:32, 16.15s/it][A
+ 75%|███████▌  | 3/4 [00:45<00:15, 15.10s/it][A
+100%|██████████| 4/4 [01:00<00:00, 15.14s/it][A100%|██████████| 4/4 [01:00<00:00, 15.08s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:15<00:47, 15.70s/it][A
+ 50%|█████     | 2/4 [00:32<00:32, 16.12s/it][A
+ 75%|███████▌  | 3/4 [00:48<00:16, 16.12s/it][A
+100%|██████████| 4/4 [01:07<00:00, 17.17s/it][A100%|██████████| 4/4 [01:07<00:00, 16.75s/it]
+  7%|█▊                        | 36/500 [1:29:13<23:22:57, 181.42s/it]  7%|█▉                        | 37/500 [1:31:19<21:12:31, 164.91s/it]  8%|█▉                        | 38/500 [1:33:28<19:46:33, 154.10s/it]  8%|██                        | 39/500 [1:35:37<18:45:31, 146.49s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:15<00:45, 15.20s/it][A
+ 50%|█████     | 2/4 [00:31<00:31, 15.56s/it][A
+ 75%|███████▌  | 3/4 [00:46<00:15, 15.66s/it][A
+100%|██████████| 4/4 [01:00<00:00, 14.99s/it][A100%|██████████| 4/4 [01:00<00:00, 15.19s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:18<00:56, 18.85s/it][A
+ 50%|█████     | 2/4 [00:35<00:34, 17.37s/it][A
+ 75%|███████▌  | 3/4 [00:50<00:16, 16.65s/it][A
+100%|██████████| 4/4 [01:07<00:00, 16.45s/it][A100%|██████████| 4/4 [01:07<00:00, 16.78s/it]
+  8%|██                        | 40/500 [1:39:52<22:52:23, 179.01s/it]  8%|██                        | 40/500 [1:39:56<19:09:18, 149.91s/it]
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 213, in <module>
+    trainer.train()
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 515, in train
+    self._train_C3PS()
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 949, in _train_C3PS
+    train_C3PS(self)
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py", line 307, in train_C3PS
+    trainer.grad_scaler2.scale(model2_loss).backward()
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/_tensor.py", line 581, in backward
+    torch.autograd.backward(
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/autograd/__init__.py", line 347, in backward
+    _engine_run_backward(
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/autograd/graph.py", line 825, in _engine_run_backward
+    return Variable._execution_engine.run_backward(  # Calls into the C++ engine to run the backward pass
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: Trying to backward through the graph a second time (or directly access saved tensors after they have already been freed). Saved intermediate values of the graph are freed when you call .backward() or autograd.grad(). Specify retain_graph=True if you need to backward through the graph a second time or if you need to access saved tensors after calling backward.

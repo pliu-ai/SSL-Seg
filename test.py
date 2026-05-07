@@ -39,6 +39,10 @@ parser.add_argument(
 class_id_name_dict = {
     'MMWHS':['MYO', 'LA', 'LV', 'RA', 'AA', 'PA', 'RV'],
     'BCV':['Spleen', 'Right Kidney', 'Left Kidney','Liver','Pancreas'],
+    'BTCV':['Spleen', 'Right Kidney', 'Left Kidney', 'Gallbladder', 'Esophagus',
+            'Liver', 'Stomach', 'Aorta', 'Inferior Vena Cava',
+            'Portal Vein and Splenic Vein', 'Pancreas',
+            'Right Adrenal Gland', 'Left Adrenal Gland'],
     'LA':['LA'],
     'FLARE':['Liver','Kidney','Spleen','Pancreas'],
     'FLARE_FR':['Liver','Kidney','Spleen','Pancreas']
@@ -311,3 +315,42 @@ if __name__ == '__main__':
                     )
     print(avg_metric)
     print(avg_metric[:, 0].mean(),avg_metric[:,1].mean(), avg_metric[:,2].mean())
+
+    # Save metrics log to prediction folder
+    metrics_log = {
+        'model_path': model_path,
+        'iteration': iteration,
+        'per_class': {},
+        'mean': {
+            'Dice': float(avg_metric[:, 0].mean()),
+            'HD95': float(avg_metric[:, 1].mean()),
+            'ASD':  float(avg_metric[:, 2].mean()),
+        }
+    }
+    for idx, name in enumerate(class_name_list):
+        metrics_log['per_class'][name] = {
+            'Dice': float(avg_metric[idx, 0]),
+            'HD95': float(avg_metric[idx, 1]),
+            'ASD':  float(avg_metric[idx, 2]),
+        }
+    save_json(metrics_log, os.path.join(pred_save_path, "metrics.json"))
+
+    log_lines = [
+        f"Model: {model_path}",
+        f"Iteration: {iteration}",
+        "",
+        f"{'Class':<35} {'Dice':>8} {'HD95':>8} {'ASD':>8}",
+        "-" * 62,
+    ]
+    for idx, name in enumerate(class_name_list):
+        log_lines.append(
+            f"{name:<35} {avg_metric[idx,0]:>8.4f} {avg_metric[idx,1]:>8.4f} {avg_metric[idx,2]:>8.4f}"
+        )
+    log_lines += [
+        "-" * 62,
+        f"{'Mean':<35} {avg_metric[:,0].mean():>8.4f} {avg_metric[:,1].mean():>8.4f} {avg_metric[:,2].mean():>8.4f}",
+    ]
+    log_text = "\n".join(log_lines)
+    print(log_text)
+    with open(os.path.join(pred_save_path, "metrics.txt"), "w") as f:
+        f.write(log_text + "\n")

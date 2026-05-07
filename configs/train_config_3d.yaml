@@ -1,4 +1,4 @@
-exp: "cond_mode_film_began_semi2000_con4000" # threshhold for model1 and model2 are 0.95
+exp: "scalar_baseline_same_split_with_magicNet_3channels_nosemi" # threshhold for model1 and model2 are 0.95
 method: C3PS # use which semi-supervised method [Baseline,MT,EM,C3PS,DAN,CPS,UAMT,ConNet,McNet,CVCL,CCRPS,CVCL_partial,CAML]
 train_3D: True # whether to train 3D models
 backbone: unet_3D_old #[unet_3D_old, McNet,unet_3D_cl, unet, caml ]# backbone model
@@ -8,17 +8,17 @@ gpu: '0'
 #root_path: ../../dataset/Task012_Heart
 
 # continue training setting
-continue_wandb: False
-continue_training: False
+continue_wandb: True
+continue_training: True
 wandb_id: "2jkdqxmi"
-model_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model1_iter_17600_dice_0.9036.pth"
-model2_checkpoint: "/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model2_iter_17600_dice_0.9036.pth"
+model_checkpoint: "/projects/weilab/liupeng/code/projects/semi-seg/model/BTCV_5_C3PS_scalar_baseline_same_split_with_magicNet_3channels_nosemi_SGD_SGD/unet_3D_old/model_iter_24800.pth"
+model2_checkpoint: "/projects/weilab/liupeng/code/projects/semi-seg/model/BTCV_5_C3PS_scalar_baseline_same_split_with_magicNet_3channels_nosemi_SGD_SGD/unet_3D_old/model2_iter_24800.pth"
 
-current_iter_num: 17600
+current_iter_num: 24800
 
 # semi supervised learning setting
-began_semi_iter: 2000  #8000 #2000
-began_condition_iter: 4000 #4000
+began_semi_iter: 100000  #8000 #2000
+began_condition_iter: 100000 #4000
 
 # evaluation settings
 began_eval_iter: 2000 # 300
@@ -107,20 +107,42 @@ METHOD:
     stride: 2
     iou_bound_low: 0.1
     iou_bound_high: 0.9
-    con_list: [1,2,3,4,5,6,7,8,9,10,11,12,13] # specificy condition list
+    con_list: [1,2,3,4,5,6,7,8,9,10,11,12,13] # flat list for dataset sampling
     addition_con_list: []
-    condition_mode: film  # 'scalar', 'concat', or 'film'
+    # --- condition grouping ---
+    condition_group_mode: fixed  # 'fixed' (use con_groups) or 'random' (random K sampling)
+    max_group_size: 3            # for random mode: K ~ Uniform[1, max_group_size]
+    con_groups: [1,2,3,4,5,6,7,8,9,10,11,12,13,[2,3],[12,13],[8,9],[5,7],[1,11],[4,6,10]]  # for fixed mode
+    # --- condition encoding ---
+    condition_mode: scalar # 'scalar', 'concat', or 'film'
     embed_dim: 8            # for concat mode
     cond_dim: 32            # for film mode
+    cond_output_channels: 3 # 2: [bg, current], 3: [bg, current, other-foreground]
+    # --- pseudo label filter ---
+    pseudo_filter_mode: binary  # 'binary' (original) or 'confidence' (continuous weight)
+  SharedC3PS: # C3PS with shared encoder
+    stride: 2
+    iou_bound_low: 0.1
+    iou_bound_high: 0.9
+    con_list: [1,2,3,4,5,6,7,8,9,10,11,12,13]
+    addition_con_list: []
+    condition_group_mode: fixed
+    max_group_size: 3
+    con_groups: [1,2,3,4,5,6,7,8,9,10,11,12,13,[2,3],[12,13],[8,9],[5,7],[1,11],[4,6,10]]
+    condition_mode: film   # 'concat' or 'film'
+    embed_dim: 8
+    cond_dim: 32
+    cond_output_channels: 2 # 2: [bg, current], 3: [bg, current, other-foreground]
   ConNet: # config for Context-Aware-Consistency
     stride: 2
     iou_bound_low: 0.1
     iou_bound_high: 0.9
     con_list: [1,2,3,4,5,6,7] # specificy condition list
     addition_con_list: [8]
-    condition_mode: concat  # 'scalar', 'concat', or 'film'
+    condition_mode: film  # 'scalar', 'concat', or 'film'
     embed_dim: 8            # for concat mode
     cond_dim: 32            # for film mode
+    cond_output_channels: 2 # 2: [bg, current], 3: [bg, current, other-foreground]
   McNet:
   CVCL:
     stride: 8
@@ -157,6 +179,7 @@ METHOD:
 
 
 DATASET:
+  shuffle_train_list_like_magicnet: true
   labeled_num: 5
   labeled_num_pl: 60 # labeled number for partial labeled data
   labeled_bs: 1 #1
@@ -215,9 +238,9 @@ DATASET:
     # Class-balanced condition sampling weights from current labeled_num=5 stats
     # (inverse-sqrt frequency with clipping for stability).
     weights: [1,1,1,1,1,1,1,1,1,1,1,1,1] #[0.5,0.7677,0.7139,1.6265,1.9581,0.5,0.5,0.7607,1.0,1.3291,1.1455,4.1109,3.6589]
-    train_list: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/train.txt"
-    train_list_pl: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt" # train list for partial labeled data
-    test_list: "/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt"
+    train_list: "/projects/weilab/liupeng/data/raw/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/train.txt"
+    train_list_pl: "/projects/weilab/liupeng/data/raw/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt" # train list for partial labeled data
+    test_list: "/projects/weilab/liupeng/data/raw/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt"
     training_data_num: 18
     testing_data_num: 12
     cut_upper: 275 #200

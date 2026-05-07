@@ -34,10 +34,15 @@ def train_C3PS(trainer) -> None:
                 volume_batch.to(trainer.device, non_blocking=True),
                 label_batch.to(trainer.device, non_blocking=True),
             )
-            condition_batch = sampled_batch['condition']
-            condition_batch = torch.cat([
-                condition_batch[:, 0], condition_batch[:, 1]
-            ], dim=0).unsqueeze(1).to(trainer.device, non_blocking=True)
+            # Convert per-sample int conditions to (2B, num_classes) multi-hot
+            condition_raw = sampled_batch['condition']  # (B, 2) long
+            condition_raw = torch.cat([
+                condition_raw[:, 0], condition_raw[:, 1]
+            ], dim=0)  # (2B,)
+            condition_batch = torch.stack([
+                trainer._con_group_to_multihot([int(c.item())])
+                for c in condition_raw
+            ]).to(trainer.device, non_blocking=True)
             ul1, br1, ul2, br2 = [], [], [], []
             labeled_idxs_batch = torch.arange(0, trainer.labeled_bs)
             unlabeled_idx_batch = torch.arange(trainer.labeled_bs, trainer.batch_size)
@@ -105,30 +110,30 @@ def train_C3PS(trainer) -> None:
                         overlap_soft1_tmp = (overlap1_soft1 + overlap2_soft1) / 2.
                         max1, pseudo_mask1 = torch.max(overlap_soft1_tmp, dim=0)
                         pred_con_list = pseudo_mask1.unique().tolist()
-                        con = trainer._get_condition(pred_con_list)
+                        con = trainer._get_condition(pred_con_list)  # (num_classes,) multi-hot
+                        con_dev = con.to(trainer.device)
+                        # is_cond: True where pseudo_mask1 matches an active condition class
+                        is_cond = con_dev[pseudo_mask1.long()].bool()
+                        is_bg = (pseudo_mask1 == 0)
                         if trainer.num_classes == 2:
-                            overlap_filter1_tmp = (
-                                (((max1 > trainer.model1_thresh) & (pseudo_mask1 != con)) |
-                                 ((max1 > 0.8) & (pseudo_mask1 == con)))
-                            ).type(torch.int16)
+                            thresh_map = torch.where(
+                                is_cond,
+                                torch.tensor(0.8, device=max1.device),
+                                torch.tensor(float(trainer.model1_thresh), device=max1.device)
+                            )
                         else:
-                            if con < trainer.num_classes:
-                                overlap_filter1_tmp = (
-                                    (((max1 > 0.99) & (pseudo_mask1 == 0)) |
-                                     ((max1 > 0.9) & (pseudo_mask1 != con) & (pseudo_mask1 != 0)) |
-                                     ((max1 > 0.9) & (pseudo_mask1 == con)))
-                                ).type(torch.int16)
-                            else:
-                                overlap_filter1_tmp = (
-                                    (((max1 > 0.99) & (pseudo_mask1 == 0)) |
-                                     ((max1 > 0.9) & (pseudo_mask1 != 0)))
-                                ).type(torch.int16)
+                            thresh_map = torch.where(
+                                is_bg,
+                                torch.tensor(0.99, device=max1.device),
+                                torch.tensor(0.9, device=max1.device)
+                            )
+                        overlap_filter1_tmp = trainer._compute_filter(max1, thresh_map)
                         overlap_soft1_list.append(overlap_soft1_tmp.unsqueeze(0))
                         overlap_filter1_list.append(overlap_filter1_tmp.unsqueeze(0))
                     overlap_soft1 = torch.cat(overlap_soft1_list, 0)
                     overlap_outputs1 = torch.cat(overlap_outputs1_list, 0)
                     overlap_filter1 = torch.cat(overlap_filter1_list, 0)
-                    condition_batch[unlabeled_idxs_batch] = con
+                    condition_batch[unlabeled_idxs_batch] = con_dev
 
                 noise2 = torch.clamp(torch.randn_like(volume_batch) * 0.1, -0.2, 0.2)
                 outputs2 = trainer.model2(volume_batch + noise2, condition_batch)
@@ -195,19 +200,20 @@ def train_C3PS(trainer) -> None:
                         overlap_outputs2_list.append(overlap2_outputs2.unsqueeze(0))
                         overlap_soft2_tmp = (overlap1_soft2 + overlap2_soft2) / 2.
                         max2, pseudo_mask2 = torch.max(overlap_soft2_tmp, dim=0)
+                        is_all_fg = (con_dev[1:].sum() >= trainer.num_classes - 1)
                         if trainer.num_classes == 2:
-                            overlap_filter2_tmp = (
-                                (max2 > trainer.model2_thresh)
-                            ).type(torch.int16)
+                            overlap_filter2_tmp = trainer._compute_filter(
+                                max2, trainer.model2_thresh
+                            )
                         else:
-                            if con < trainer.num_classes:
-                                overlap_filter2_tmp = (
-                                    (max2 > trainer.model2_thresh) & (pseudo_mask2 > 0)
-                                ).type(torch.int16)
+                            if not is_all_fg:
+                                region_mask = (pseudo_mask2 > 0).float()
                             else:
-                                overlap_filter2_tmp = (
-                                    (max2 > trainer.model2_thresh) & (pseudo_mask2 == 0)
-                                ).type(torch.int16)
+                                region_mask = (pseudo_mask2 == 0).float()
+                            overlap_filter2_tmp = (
+                                trainer._compute_filter(max2, trainer.model2_thresh)
+                                * region_mask
+                            )
                         overlap_soft2_list.append(overlap_soft2_tmp.unsqueeze(0))
                         overlap_filter2_list.append(overlap_filter2_tmp.unsqueeze(0))
                     overlap_soft2 = torch.cat(overlap_soft2_list, 0)
@@ -263,16 +269,12 @@ def train_C3PS(trainer) -> None:
                             overlap_pseudo_outputs1,
                             condition_batch[unlabeled_idxs_batch]
                         )
-                        target_ce_con[overlap_pseudo_filter1 == 0] = 255
-                        ce_pseudo_supervision2 = trainer.ce_loss(
-                            overlap_outputs2, target_ce_con
+                        ce_pseudo_supervision2 = trainer._weighted_ce_loss(
+                            overlap_outputs2, target_ce_con, overlap_pseudo_filter1
                         )
                         dice_pseudo_supervision2 = trainer.dice_loss_con(
-                            torch.softmax(overlap_outputs2, dim=1) * overlap_pseudo_filter1,
-                            ((overlap_pseudo_outputs1 == condition_batch[
-                                unlabeled_idxs_batch
-                            ].unsqueeze(-1).unsqueeze(-1)
-                              ).long() * overlap_pseudo_filter1).unsqueeze(1),
+                            torch.softmax(overlap_outputs2, dim=1) * overlap_pseudo_filter1.unsqueeze(1),
+                            (target_ce_con * overlap_pseudo_filter1).unsqueeze(1),
                             skip_id=0
                         )
                         pseudo_supervision2 = ce_pseudo_supervision2 + dice_pseudo_supervision2
@@ -281,11 +283,13 @@ def train_C3PS(trainer) -> None:
                             outputs_soft1[trainer.labeled_bs:].detach(),
                             dim=1, keepdim=False
                         )
+                        target_ce_con = trainer._get_label_batch_for_conditional_net(
+                            pseudo_outputs1,
+                            condition_batch[trainer.labeled_bs:]
+                        )
                         pseudo_supervision2 = trainer.ce_loss(
                             outputs2[trainer.labeled_bs:],
-                            (pseudo_outputs1 == condition_batch[
-                                trainer.labeled_bs:
-                            ].unsqueeze(-1).unsqueeze(-1)).long()
+                            target_ce_con
                         )
 
                 model1_loss = loss1 + trainer.consistency_weight * pseudo_supervision1
@@ -389,25 +393,11 @@ def train_C3PS(trainer) -> None:
             full_label_batch = label_batch[labeled_idxs_batch]
             full_condition_batch = condition_batch[labeled_idxs_batch]
             con_list1 = full_label_batch[0].unique().tolist()
+            con1 = trainer._get_condition(con_list1)
             con_list2 = full_label_batch[1].unique().tolist()
-            if 0 in con_list1:
-                con_list1.remove(0)
-            inter_label_list = list(
-                set(con_list1) & set(trainer.method_config['con_list'])
-            )
-            if len(inter_label_list) == 0:
-                inter_label_list = trainer.method_config['con_list']
-            con1 = np.random.choice(inter_label_list)
-            if 0 in con_list2:
-                con_list2.remove(0)
-            inter_label_list = list(
-                set(con_list2) & set(trainer.method_config['con_list'])
-            )
-            if len(inter_label_list) == 0:
-                inter_label_list = trainer.method_config['con_list']
-            con2 = np.random.choice(inter_label_list)
-            full_condition_batch[0] = con1
-            full_condition_batch[1] = con2
+            con2 = trainer._get_condition(con_list2)
+            full_condition_batch[0] = con1.to(trainer.device)
+            full_condition_batch[1] = con2.to(trainer.device)
             for i_batch, sampled_batch in enumerate(trainer.dataloader_pl):
                 trainer.model2.train()
                 volume_batch, label_batch = (
@@ -417,10 +407,13 @@ def train_C3PS(trainer) -> None:
                 volume_batch, label_batch = (
                     volume_batch.to(trainer.device), label_batch.to(trainer.device)
                 )
-                condition_batch = torch.cat([
-                    torch.Tensor([5]), torch.Tensor([5]),
-                    torch.Tensor([5]), torch.Tensor([5]),
-                ], dim=0).unsqueeze(1).to(trainer.device)
+                # all-foreground condition for PL
+                all_fg = trainer._con_group_to_multihot(
+                    list(range(1, trainer.num_classes))
+                )
+                condition_batch = all_fg.unsqueeze(0).expand(
+                    volume_batch.shape[0], -1
+                ).to(trainer.device)
                 noise = torch.clamp(
                     torch.randn_like(volume_batch) * 0.1, -0.2, 0.2
                 ).to(trainer.device)

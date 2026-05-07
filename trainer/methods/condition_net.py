@@ -17,10 +17,15 @@ def train_ConditionNet(trainer) -> None:
             volume_batch, label_batch = (
                 volume_batch.to(trainer.device), label_batch.to(trainer.device)
             )
-            condition_batch = sampled_batch['condition']
-            condition_batch = torch.cat([
-                condition_batch[0], condition_batch[1]
-            ], dim=0).unsqueeze(1).to(trainer.device)
+            # Convert per-sample int conditions to (2B, num_classes) multi-hot
+            condition_raw = sampled_batch['condition']  # (B, 2) long
+            condition_raw = torch.cat([
+                condition_raw[:, 0], condition_raw[:, 1]
+            ], dim=0)  # (2B,)
+            condition_batch = torch.stack([
+                trainer._con_group_to_multihot([int(c.item())])
+                for c in condition_raw
+            ]).to(trainer.device)
             labeled_idxs_batch = torch.arange(0, trainer.labeled_bs)
             if trainer.use_CAC:
                 volume_batch = torch.cat(

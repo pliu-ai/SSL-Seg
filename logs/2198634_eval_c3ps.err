@@ -1,0 +1,6 @@
+cpu-bind=MASK - g008, task  0  0 [3055323]: mask 0x2fffe00000000 set
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/test.py", line 263, in <module>
+    iteration, dice = model_name_properties[2],model_name_properties[4].replace(".pth","")
+                                               ~~~~~~~~~~~~~~~~~~~~~^^^
+IndexError: list index out of range

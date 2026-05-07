@@ -1,0 +1,72 @@
+cpu-bind=MASK - g002, task  0  0 [2560095]: mask 0x111111555550 set
+/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:207: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler1 = GradScaler()
+/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:208: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.grad_scaler2 = GradScaler()
+wandb: Using wandb-core as the SDK backend.  Please refer to https://wandb.me/wandb-core for more information.
+wandb: Currently logged in as: luckiepeng to https://api.wandb.ai. Use `wandb login --relogin` to force relogin
+wandb: Tracking run with wandb version 0.19.9
+wandb: Run data is saved locally in /projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/wandb/run-20260506_172509-x9yzicea
+wandb: Run `wandb offline` to turn off syncing.
+wandb: Syncing run BTCV_C3PS_labeled5_SGD_SGD_scalar_baseline_same_split_with_magicNet_3channels_nosemi
+wandb: ⭐️ View project at https://wandb.ai/luckiepeng/semi-supervised-segmentation
+wandb: 🚀 View run at https://wandb.ai/luckiepeng/semi-supervised-segmentation/runs/x9yzicea
+/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:458: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler = GradScaler()
+/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py:479: FutureWarning: `torch.cuda.amp.GradScaler(args...)` is deprecated. Please use `torch.amp.GradScaler('cuda', args...)` instead.
+  self.scaler2 = GradScaler()
+/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/optim/lr_scheduler.py:62: UserWarning: The verbose parameter is deprecated. Please use get_last_lr() to access the learning rate.
+  warnings.warn(
+  0%|                                         | 0/500 [00:00<?, ?it/s]/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py:73: FutureWarning: `torch.cuda.amp.autocast(args...)` is deprecated. Please use `torch.amp.autocast('cuda', args...)` instead.
+  with autocast():
+  0%|                                         | 0/500 [00:07<?, ?it/s]
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 213, in <module>
+    trainer.train()
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 593, in train
+    self._train_C3PS()
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 1027, in _train_C3PS
+    train_C3PS(self)
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py", line 74, in train_C3PS
+    outputs1 = trainer.model(volume_batch + noise1)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/networks/unet_3D.py", line 72, in forward
+    conv1 = self.conv1(inputs)
+            ^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/code/projects/semi-seg/SSL-Seg/networks/utils.py", line 121, in forward
+    outputs = self.conv1(inputs)
+              ^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/container.py", line 250, in forward
+    input = module(input)
+            ^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1736, in _wrapped_call_impl
+    return self._call_impl(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1747, in _call_impl
+    return forward_call(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 725, in forward
+    return self._conv_forward(input, self.weight, self.bias)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/nn/modules/conv.py", line 720, in _conv_forward
+    return F.conv3d(
+           ^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 300.00 MiB. GPU 0 has a total capacity of 15.77 GiB of which 104.75 MiB is free. Process 229469 has 6.32 GiB memory in use. Process 2874492 has 3.00 GiB memory in use. Process 3365015 has 1.60 GiB memory in use. Process 3519322 has 2.79 GiB memory in use. Process 2633087 has 306.00 MiB memory in use. Process 3014827 has 306.00 MiB memory in use. Process 3176100 has 306.00 MiB memory in use. Process 268936 has 306.00 MiB memory in use. Including non-PyTorch memory, this process has 658.00 MiB memory in use. Of the allocated memory 253.74 MiB is allocated by PyTorch, and 40.26 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://pytorch.org/docs/stable/notes/cuda.html#environment-variables)

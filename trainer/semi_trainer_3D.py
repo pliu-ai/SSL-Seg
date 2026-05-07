@@ -48,6 +48,8 @@ from trainer.methods.gfel import train_GFEL
 from trainer.methods.caml import train_CAML
 from trainer.methods.cssr import train_CSSR
 from trainer.methods.condition_net import train_ConditionNet
+from trainer.methods.shared_c3ps import train_SharedC3PS
+from trainer.methods.cond_baseline import train_CondBaseline
 
 
 
@@ -138,6 +140,18 @@ class SemiSupervisedTrainer3D:
         self.method_config = config['METHOD'][self.method_name]
         self.use_CAC = config['use_CAC']
         self.use_PL = config['use_PL']
+        self.cond_output_channels = int(
+            self.method_config.get(
+                'cond_output_channels',
+                config.get('cond_output_channels', 2),
+            )
+        )
+        if self.cond_output_channels < 2:
+            raise ValueError("cond_output_channels must be >= 2")
+        self.pseudo_filter_mode = (
+            self.method_config.get('pseudo_filter_mode', 'binary')
+            if self.method_config else 'binary'
+        )
         
         # SAM pipeline (encapsulates all SAM/FN-recovery config and state)
         sam_cfg = config.get('sam', {})
@@ -158,7 +172,7 @@ class SemiSupervisedTrainer3D:
         self.experiment_name = None
         self.ce_loss = nn.CrossEntropyLoss(ignore_index=255)
         self.dice_loss = losses.DiceLoss(self.num_classes)
-        self.dice_loss_con = losses.DiceLoss(2)
+        self.dice_loss_con = losses.DiceLoss(self.cond_output_channels)
         self.dice_loss2 = DiceLoss(normalization='softmax')
         self.cvcl_loss = None
         self.best_performance = 0.0
@@ -192,6 +206,10 @@ class SemiSupervisedTrainer3D:
         self.consistency_weight = None
         self.grad_scaler1 = GradScaler()
         self.grad_scaler2 = GradScaler()
+        self.shuffle_train_list_like_magicnet = bool(
+            dataset.get('shuffle_train_list_like_magicnet', False)
+        )
+        self._prepared_train_list_path = None
         
 
     
@@ -230,15 +248,27 @@ class SemiSupervisedTrainer3D:
                 model_config=self.config['model'], device=self.device
             )
             self._kaiming_normal_init_weight()
-        elif self.method_name in ['C3PS','ConNet']:
+        elif self.method_name in ['C3PS','ConNet','CondBaseline']:
             self.model2 = net_factory_3d(
-                self.backbone2, in_chns=1, class_num=2, device=self.device,
+                self.backbone2, in_chns=1,
+                class_num=self.cond_output_channels, device=self.device,
                 num_conditions=self.num_classes,
                 embed_dim=self.method_config.get('embed_dim', 8),
                 condition_mode=self.method_config.get('condition_mode', 'concat'),
                 cond_dim=self.method_config.get('cond_dim', 32),
             )
             self._kaiming_normal_init_weight()
+        elif self.method_name == 'SharedC3PS':
+            # Single model with shared encoder + two decoders
+            self.model = net_factory_3d(
+                'shared_encoder_cond', in_chns=1,
+                class_num=self.num_classes, device=self.device,
+                num_conditions=self.num_classes,
+                embed_dim=self.method_config.get('embed_dim', 8),
+                condition_mode=self.method_config.get('condition_mode', 'film'),
+                cond_dim=self.method_config.get('cond_dim', 32),
+                cond_out_classes=self.cond_output_channels,
+            )
         elif self.method_name == 'CSSR':
             self.model2 = net_factory_3d(
                 self.backbone2, in_chns=1, class_num=self.num_classes,
@@ -278,12 +308,54 @@ class SemiSupervisedTrainer3D:
         )
         
 
+    @staticmethod
+    def _extract_case_id(path):
+        basename = os.path.basename(str(path).strip())
+        digits = ''.join(ch for ch in basename if ch.isdigit())
+        if len(digits) >= 4:
+            return digits[-4:]
+        return basename
+
+    def _prepare_train_list_for_sampling(self):
+        if self._prepared_train_list_path is not None:
+            return self._prepared_train_list_path
+
+        if not self.shuffle_train_list_like_magicnet:
+            self._prepared_train_list_path = self.train_list
+            return self._prepared_train_list_path
+
+        with open(self.train_list, 'r') as f:
+            train_rows = [line.strip() for line in f.readlines() if line.strip()]
+        rng = np.random.RandomState(self.seed)
+        rng.shuffle(train_rows)
+
+        shuffled_list_path = os.path.join(
+            self.output_folder, f"train_list_magicnet_seed{self.seed}.txt"
+        )
+        with open(shuffled_list_path, 'w') as f:
+            for row in train_rows:
+                f.write(row + '\n')
+
+        self._prepared_train_list_path = shuffled_list_path
+        labeled_cases = [self._extract_case_id(item) for item in train_rows[:self.labeled_num]]
+        unlabeled_cases = [self._extract_case_id(item) for item in train_rows[self.labeled_num:]]
+        self.logging.info(
+            "MagicNet-like split enabled. train_list=%s seed=%d labeled=%s unlabeled=%s",
+            self.train_list,
+            self.seed,
+            labeled_cases,
+            unlabeled_cases,
+        )
+        return self._prepared_train_list_path
+
     def load_dataset(self):
         train_supervised = False
         if self.method_name == 'Baseline':
             train_supervised = True
 
-        self.dataset = DatasetSemi(img_list_file=self.train_list, 
+        train_list_for_sampling = self._prepare_train_list_for_sampling()
+
+        self.dataset = DatasetSemi(img_list_file=train_list_for_sampling, 
                                         cutout=self.cutout,
                                         rotate_trans=self.rotate_trans, 
                                         scale_trans=self.scale_trans,
@@ -296,9 +368,9 @@ class SemiSupervisedTrainer3D:
                                         labeled_num=self.labeled_num,
                                         train_supervised=train_supervised,
                                         normalization=self.normalization)
-        if self.method_name in ['C3PS','ConNet','CVCL','CVCL_partial']:
+        if self.method_name in ['C3PS','ConNet','CVCL','CVCL_partial','SharedC3PS','CondBaseline']:
             self.dataset = BCVDatasetCAC(
-                img_list_file=self.train_list,
+                img_list_file=train_list_for_sampling,
                 patch_size=self.patch_size,
                 num_class=self.num_classes,
                 stride=self.method_config['stride'],
@@ -331,7 +403,7 @@ class SemiSupervisedTrainer3D:
             )
         if self.method_name == 'CSSR':
             self.dataset = DatasetSR(
-                img_list_file=self.train_list,
+                img_list_file=train_list_for_sampling,
                 patch_size_small=self.patch_size,
                 patch_size_large=self.method_config['patch_size_large'],
                 num_class=self.num_classes,
@@ -403,7 +475,7 @@ class SemiSupervisedTrainer3D:
                                           weight_decay=self.weight_decay,
                                           amsgrad=True)
         
-        if self.method_name in ['CPS', 'C3PS', 'ConNet', 'CSSR']:
+        if self.method_name in ['CPS', 'C3PS', 'ConNet', 'CSSR', 'CondBaseline']:
             self.scaler2 = GradScaler()
             if self.optimizer2_type == 'Adam':
                 self.optimizer2 = torch.optim.Adam(
@@ -431,8 +503,13 @@ class SemiSupervisedTrainer3D:
             threshold_mode="abs")
     
     def train(self):
+        total_train_samples = len(self.dataset)
+        if self.labeled_num > total_train_samples:
+            raise ValueError(
+                f"labeled_num ({self.labeled_num}) > total training samples ({total_train_samples})"
+            )
         self.labeled_idxs = list(range(0, self.labeled_num))
-        self.unlabeled_idxs = list(range(self.labeled_num, self.training_data_num))
+        self.unlabeled_idxs = list(range(self.labeled_num, total_train_samples))
         if self.method_name == "Baseline":
             self.dataloader = DataLoader(
                 self.dataset,
@@ -444,6 +521,22 @@ class SemiSupervisedTrainer3D:
             print(f"max epochs:{self.max_epoch}, max iterations:{self.max_iterations}")
             print(f"len dataloader:{len(self.dataloader)}")
             self._train_baseline()
+        elif self.method_name == "CondBaseline":
+            self.dataloader = DataLoader(
+                self.dataset,
+                batch_size=self.batch_size,
+                shuffle=True,
+                **self._build_dataloader_kwargs(),
+            )
+            if self.iters_per_epoch is not None and self.num_epochs is not None:
+                self.iters_per_epoch = int(self.iters_per_epoch)
+                self.num_epochs = int(self.num_epochs)
+                self.max_epoch = self.num_epochs
+                self.max_iterations = self.iters_per_epoch * self.num_epochs
+            else:
+                self.max_epoch = self.max_iterations // len(self.dataloader) + 1
+            print(f"CondBaseline: max epochs:{self.max_epoch}, max iterations:{self.max_iterations}")
+            self._train_CondBaseline()
         elif self.method_name == 'CVCL_partial':
             self.dataloader = DataLoader(
                 self.dataset,
@@ -498,6 +591,15 @@ class SemiSupervisedTrainer3D:
                         self.max_iterations,
                     )
                 self._train_C3PS()
+            elif self.method_name == 'SharedC3PS':
+                if self.iters_per_epoch is not None and self.num_epochs is not None:
+                    self.iters_per_epoch = int(self.iters_per_epoch)
+                    self.num_epochs = int(self.num_epochs)
+                    if self.iters_per_epoch <= 0 or self.num_epochs <= 0:
+                        raise ValueError("iters_per_epoch and num_epochs must be positive integers")
+                    self.max_epoch = self.num_epochs
+                    self.max_iterations = self.iters_per_epoch * self.num_epochs
+                self._train_SharedC3PS()
             elif self.method_name == 'DAN':
                 self._train_DAN()
             elif self.method_name == 'URPC':
@@ -577,7 +679,16 @@ class SemiSupervisedTrainer3D:
                 self.best_performance = best_performance
                 save_only = 'model1'
             save_name = f'iter_{self.current_iter}_dice_{round(best_performance,4)}'
-            self._save_checkpoint(save_name, only=save_only)
+            if self.method_name == 'SharedC3PS':
+                # Single model: save with dec1/dec2 prefix to distinguish
+                prefix = 'best_dec2' if do_condition else 'best_dec1'
+                save_path = os.path.join(
+                    self.output_folder,
+                    f'{prefix}_{save_name}.pth'
+                )
+                torch.save(self.model.state_dict(), save_path)
+            else:
+                self._save_checkpoint(save_name, only=save_only)
 
         self.tensorboard_writer.add_scalar(f'info/{model_name}_val_dice_score',
                         avg_metric[:, 0].mean(), self.current_iter)
@@ -833,21 +944,79 @@ class SemiSupervisedTrainer3D:
 
         
             
-    def _get_condition(self, pred_con_list):
+    def _normalize_con_list(self, con_list):
+        """Normalize con_list so every element is a list (group).
+
+        e.g. [1, [2,3], 4] -> [[1], [2,3], [4]]
         """
-        get conditon number for conditional network
+        out = []
+        for item in con_list:
+            if isinstance(item, (list, tuple)):
+                out.append(list(item))
+            else:
+                out.append([int(item)])
+        return out
+
+    def _con_group_to_multihot(self, group):
+        """Convert a condition group (list of class ids) to a multi-hot tensor (num_classes,)."""
+        vec = torch.zeros(self.num_classes, dtype=torch.float32)
+        for c in group:
+            if c < self.num_classes:
+                vec[int(c)] = 1.0
+            else:
+                # all foreground
+                vec[1:] = 1.0
+        return vec
+
+    def _get_condition(self, pred_con_list):
+        """Get condition multi-hot vector for conditional network.
+
+        Condition grouping mode (set via config 'condition_group_mode'):
+          - 'fixed'  : sample a group from 'con_groups' (or 'con_list' as single-class groups)
+          - 'random'  : randomly sample K classes from eligible classes,
+                        K ~ Uniform[1, max_group_size]
+
+        Returns:
+            (num_classes,) float tensor — multi-hot condition vector.
         """
         if 0 in pred_con_list:
             pred_con_list.remove(0)
-        inter_label_list = list(
-            set(pred_con_list) & set(self.method_config['con_list'])
-        )
-        # use num_class as con label
-        inter_label_list+=self.method_config['addition_con_list']
-        if len(inter_label_list) == 0:
-            inter_label_list = self.method_config['con_list']
-        con = np.random.choice(inter_label_list)
-        return con
+
+        mode = self.method_config.get('condition_group_mode', 'fixed')
+        max_group_size = self.method_config.get('max_group_size', 2)
+
+        if mode == 'random':
+            # Collect all eligible individual classes
+            all_classes = set()
+            for item in self.method_config['con_list']:
+                if isinstance(item, (list, tuple)):
+                    all_classes.update(item)
+                else:
+                    all_classes.add(int(item))
+            eligible_classes = list(all_classes & set(pred_con_list))
+            if len(eligible_classes) == 0:
+                eligible_classes = list(all_classes)
+            # add addition classes
+            for item in self.method_config.get('addition_con_list', []):
+                if isinstance(item, (list, tuple)):
+                    eligible_classes.extend(item)
+                else:
+                    eligible_classes.append(int(item))
+            eligible_classes = list(set(eligible_classes))
+            K = np.random.randint(1, min(max_group_size, len(eligible_classes)) + 1)
+            group = list(np.random.choice(eligible_classes, size=K, replace=False))
+            return self._con_group_to_multihot(group)
+        else:
+            # fixed mode: sample a pre-defined group
+            raw_groups = self.method_config.get('con_groups', self.method_config['con_list'])
+            con_groups = self._normalize_con_list(raw_groups)
+            eligible = [g for g in con_groups if set(g) & set(pred_con_list)]
+            addi_groups = self._normalize_con_list(self.method_config.get('addition_con_list', []))
+            eligible += addi_groups
+            if len(eligible) == 0:
+                eligible = con_groups
+            group = eligible[np.random.randint(len(eligible))]
+            return self._con_group_to_multihot(group)
 
     def _train_CVCL_partial(self):
         train_CVCL_partial(self)
@@ -856,6 +1025,10 @@ class SemiSupervisedTrainer3D:
         train_CVCL(self)
     def _train_C3PS(self):
         train_C3PS(self)
+    def _train_CondBaseline(self):
+        train_CondBaseline(self)
+    def _train_SharedC3PS(self):
+        train_SharedC3PS(self)
     def _train_GFEL(self):
         train_GFEL(self)
     def _train_CAML(self):
@@ -909,7 +1082,7 @@ class SemiSupervisedTrainer3D:
             grad_scaler=self.grad_scaler1,
             current_iter=self.current_iter,
             wandb_id=self.wandb_logger.id,
-            model2=self.model2,
+            model2=getattr(self, 'model2', None),
             optimizer2=getattr(self, 'optimizer2', None),
             grad_scaler2=self.grad_scaler2,
             only=only,
@@ -917,22 +1090,44 @@ class SemiSupervisedTrainer3D:
     
     
     def _get_label_batch_for_conditional_net(self, label_batch, condition_batch):
+        """Convert label batch to condition label batch.
+
+        Args:
+            label_batch: (B, D, H, W) long tensor of class labels.
+            condition_batch: (B, num_classes) multi-hot float tensor.
+        Returns:
+            (B, D, H, W) long tensor.
+            - cond_output_channels == 2: {0:bg/non-active, 1:active}
+            - cond_output_channels == 3: {0:bg, 1:active, 2:other-foreground}
         """
-        convert label batch to condition label batch
-        """
-        if condition_batch.max() < self.num_classes:
-            return (
-                        label_batch==condition_batch.unsqueeze(-1).unsqueeze(-1)
-            ).long()
-        else:
-            label_batch_con = torch.zeros_like(label_batch)
-            for i,con in enumerate(condition_batch):
-                if con == self.num_classes:
-                    label_batch_con[i][label_batch[i]>0] = 1
-                else:
-                    label_batch_con[i][label_batch[i]!=con] = 0
-                    label_batch_con[i][label_batch[i]==con] = 1
+        cond_channels = int(getattr(self, "cond_output_channels", 2))
+        B = label_batch.shape[0]
+        label_batch_con = torch.zeros_like(label_batch)
+
+        if cond_channels == 2:
+            for i in range(B):
+                active_classes = condition_batch[i].nonzero(as_tuple=True)[0]
+                for c in active_classes:
+                    label_batch_con[i][label_batch[i] == c] = 1
             return label_batch_con
+
+        if cond_channels == 3:
+            # Default all foreground to "other foreground" channel (2).
+            label_batch_con[label_batch > 0] = 2
+            for i in range(B):
+                active_classes = condition_batch[i].nonzero(as_tuple=True)[0]
+                active_classes = active_classes[active_classes > 0]
+                if active_classes.numel() == 0:
+                    continue
+                active_mask = torch.zeros_like(label_batch[i], dtype=torch.bool)
+                for c in active_classes:
+                    active_mask |= (label_batch[i] == c)
+                label_batch_con[i][active_mask] = 1
+            return label_batch_con
+
+        raise ValueError(
+            f"Unsupported cond_output_channels={cond_channels}, expected 2 or 3"
+        )
                     
     def _kaiming_normal_init_weight(self):
         for m in self.model2.modules():
@@ -951,26 +1146,112 @@ class SemiSupervisedTrainer3D:
                 m.weight.data.fill_(1)
                 m.bias.data.zero_()
     
-    def _cross_entropy_loss_con(self, output, target, condition, filter):
+    def _compute_filter(self, max_prob, threshold):
+        """Compute pseudo-label filter weight.
+
+        Args:
+            max_prob: (D, H, W) or (B, D, H, W) max softmax probability.
+            threshold: scalar threshold.
+        Returns:
+            Same shape tensor: binary {0,1} or continuous [0,1] depending on
+            self.pseudo_filter_mode.
         """
-        cross entropy loss for conditional network
-        """
-        softmax = torch.softmax(output,dim=1)
-        B,C,D,H,W = softmax.shape
-        softmax_con = torch.zeros(B,2,D,H,W).to(self.device)
-        if condition[0] < self.num_classes:
-            softmax_con[:,1,...] = softmax[np.arange(B),condition.squeeze().long(),...] 
-            softmax_con[:,0,...] = 1.0 - softmax_con[:,1,...]
-            log = -torch.log(softmax_con.gather(1, target.unsqueeze(1)) + 1e-7)
-            #loss = log.mean()
-            loss = (log*filter.unsqueeze(1)).sum()/filter.sum() # with filter
+        if self.pseudo_filter_mode == 'confidence':
+            # continuous weight: 0 below threshold, linear ramp to 1 above
+            weight = ((max_prob - threshold) / (1.0 - threshold + 1e-7)).clamp(min=0.0)
+            return weight.detach()
         else:
-            softmax_con[:,0,...] = softmax[np.arange(B),0,...] 
-            softmax_con[:,1,...] = 1.0 - softmax_con[:,0,...]
-            log = -torch.log(softmax_con.gather(1, target.unsqueeze(1)) + 1e-7)
-            #loss = log.mean()
-            loss = (log*filter.unsqueeze(1)).sum()/filter.sum() # with filter
+            # binary (original)
+            return (max_prob > threshold).type(torch.int16)
+
+    def _weighted_ce_loss(self, output, target, weight):
+        """Weighted cross-entropy loss (replaces ignore_index=255 pattern).
+
+        Args:
+            output: (B, C, ...) logits.
+            target: (B, ...) long class indices.
+            weight: (B, ...) per-voxel weight (0~1).
+        Returns:
+            scalar loss.
+        """
+        ce = F.cross_entropy(output, target.long(), reduction='none')
+        if weight.sum() == 0:
+            return torch.tensor(0.0, device=output.device)
+        return (ce * weight).sum() / weight.sum()
+
+    def _cross_entropy_loss_con(self, output, target, condition, filter=None):
+        """Cross entropy loss for conditional network.
+
+        Args:
+            output: (B, C, D, H, W) logits from model1 (multi-class).
+            target: (B, D, H, W) pseudo-label from model2.
+            condition: (B, num_classes) multi-hot float tensor.
+            filter: (B, D, H, W) confidence filter mask (optional).
+        """
+        cond_channels = int(getattr(self, "cond_output_channels", 2))
+        softmax = torch.softmax(output, dim=1)
+        B, C, D, H, W = softmax.shape
+        cond_mask = condition[:, :C].unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
+        cond_mask = cond_mask.float()
+        if cond_mask.shape[1] > 0:
+            cond_mask[:, 0, ...] = 0.0
+
+        active_fg_prob = (softmax * cond_mask).sum(dim=1)
+
+        if cond_channels == 2:
+            softmax_con = torch.zeros(B, 2, D, H, W, device=self.device)
+            softmax_con[:, 1, ...] = active_fg_prob
+            softmax_con[:, 0, ...] = 1.0 - softmax_con[:, 1, ...]
+        elif cond_channels == 3:
+            softmax_con = torch.zeros(B, 3, D, H, W, device=self.device)
+            softmax_con[:, 0, ...] = softmax[:, 0, ...]
+            softmax_con[:, 1, ...] = active_fg_prob
+            fg_prob = softmax[:, 1:, ...].sum(dim=1)
+            softmax_con[:, 2, ...] = torch.clamp(fg_prob - active_fg_prob, min=0.0)
+            # Numerical stability for tiny mismatch from accumulation.
+            softmax_con = softmax_con / softmax_con.sum(dim=1, keepdim=True).clamp(min=1e-7)
+        else:
+            raise ValueError(
+                f"Unsupported cond_output_channels={cond_channels}, expected 2 or 3"
+            )
+
+        if filter is None:
+            filter = torch.ones_like(target, dtype=softmax_con.dtype, device=softmax_con.device)
+        else:
+            filter = filter.to(device=softmax_con.device, dtype=softmax_con.dtype)
+
+        if filter.sum() == 0:
+            return torch.tensor(0.0, device=softmax_con.device)
+
+        log = -torch.log(softmax_con.gather(1, target.unsqueeze(1)) + 1e-7)
+        loss = (log * filter.unsqueeze(1)).sum() / filter.sum()
         return loss
+
+    def _dice_loss_con_reverse(self, output, target, condition, filter):
+        """Dice loss: model2 binary pseudo-label supervises model1 (multi-class -> binary).
+
+        Aggregates model1's softmax into binary (fg/bg) via condition mask,
+        then computes dice loss against model2's binary pseudo-label.
+
+        Args:
+            output: (B, C, D, H, W) logits from model1 (multi-class).
+            target: (B, D, H, W) binary pseudo-label from model2 (0 or 1).
+            condition: (B, num_classes) multi-hot float tensor.
+            filter: (B, D, H, W) confidence filter mask.
+        """
+        softmax = torch.softmax(output, dim=1)
+        B, C, D, H, W = softmax.shape
+        cond_mask = condition[:, :C].unsqueeze(-1).unsqueeze(-1).unsqueeze(-1)
+        # model1 fg prob = sum of conditioned class probs
+        fg_prob = (softmax * cond_mask).sum(dim=1)  # (B, D, H, W)
+        # apply filter
+        fg_prob = fg_prob * filter
+        target_filtered = target.float() * filter
+        # dice
+        intersection = (fg_prob * target_filtered).sum()
+        union = fg_prob.sum() + target_filtered.sum()
+        dice = 1.0 - (2.0 * intersection + 1e-5) / (union + 1e-5)
+        return dice
 
     def _adjust_learning_rate(self):
         if self.optimizer_type == 'SGD': # no need to adjust learning rate for adam optimizer   
@@ -981,7 +1262,7 @@ class SemiSupervisedTrainer3D:
                 param_group['lr'] = self.current_lr
         
         if (
-            self.method_name in ['CPS','C3PS','ConNet'] and
+            self.method_name in ['CPS','C3PS','ConNet','CondBaseline'] and
             self.optimizer2_type == 'SGD'
         ):
                 self.current2_lr = self.initial2_lr * (

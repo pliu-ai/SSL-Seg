@@ -1,0 +1,29 @@
+==========================================================
+Starting on g011
+Time is Mon Mar 23 00:36:09 EDT 2026
+SLURM_JOB_ID: 2202553
+Node type: GPU
+Running command: python test.py --model_path /projects/weilab/liupeng/projects/semi-seg/model/BTCV_5_C3PS_cond_mode_file_random_3_cls_con_no_semi_SGD_SGD/unet_3D_old/model1_iter_12800_dice_0.7136.pth
+==========================================================
+Python path: /projects/weilab/liupeng/conda/envs/ssl_seg/bin/python
+Micromamba environment: ssl_seg
+JUST_RUNTIME_DIR set to: /home/liupen/.just_runtime
+===========> using config file: 2026-03-17=12-15-27_train_config.yaml
+Total test images: 12
+Validation begin
+Validation end
+[[ 0.82112528  0.         24.42187502]
+ [ 0.68749077  0.          3.54770925]
+ [ 0.745044    0.          6.13002674]
+ [ 0.3996759  12.5        32.17355595]
+ [ 0.59127086  0.          1.96063673]
+ [ 0.93095629  0.          9.55478895]
+ [ 0.58437212  0.         11.64756578]
+ [ 0.85797334  0.          4.25508163]
+ [ 0.7429985   0.          9.63627362]
+ [ 0.55726766  0.          8.07915789]
+ [ 0.47610544  0.          3.06238467]
+ [ 0.42430348  0.          1.03112941]
+ [ 0.37849611 12.5        15.03993687]]
+0.6305445971149624 1.9230769230769231 10.041547886012697
+Discord command not found, skipping notification

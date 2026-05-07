@@ -1,0 +1,853 @@
+==========================================================
+Starting on g004
+Time is Sat Mar 21 04:27:37 PM EDT 2026
+SLURM_JOB_ID: 2201287
+Node type: GPU
+Running command: python train_semi-supervised.py
+==========================================================
+Python path: /projects/weilab/liupeng/conda/envs/ssl_seg/bin/python
+Micromamba environment: ssl_seg
+JUST_RUNTIME_DIR set to: /home/liupen/.just_runtime
+{'exp': 'c3ps_confidence_filter_semi-began4000_8000', 'method': 'C3PS', 'train_3D': True, 'backbone': 'unet_3D_old', 'backbone2': 'unet_3D_condtion_decoder', 'dataset_name': 'BTCV', 'gpu': '0', 'continue_wandb': False, 'continue_training': False, 'wandb_id': '2jkdqxmi', 'model_checkpoint': '/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model1_iter_17600_dice_0.9036.pth', 'model2_checkpoint': '/projects/weilab/liupeng/semi-seg/model/LA_8_CCRPS_test_SGD_SGD/unet_3D_old/model2_iter_17600_dice_0.9036.pth', 'current_iter_num': 17600, 'began_semi_iter': 4000, 'began_condition_iter': 8000, 'began_eval_iter': 2000, 'val_freq': 400, 'val_sample_num': 4, 'condition_eval_batch_size': 2, 'save_checkpoint_freq': 200, 'max_iterations': 20000, 'iters_per_epoch': 100, 'num_epochs': 500, 'use_CAC': True, 'use_PL': False, 'deterministic': 1, 'initial_lr': 0.01, 'initial2_lr': 0.01, 'optimizer_type': 'SGD', 'optimizer2_type': 'SGD', 'model1_thresh': 0.9, 'model2_thresh': 0.95, 'seed': 1337, 'ema_decay': 0.99, 'consistency_type': 'mse', 'consistency': 0.1, 'consistency_rampup': 200.0, 'weight_decay': 1e-05, 'lr_scheduler_patience': 30, 'lr_scheduler_eps': 0.001, 'show_img_freq': 1000, 'train_log_interval': 20, 'dataloader_num_workers': 8, 'dataloader_prefetch_factor': 2, 'dataloader_persistent_workers': True, 'dataloader_pin_memory': True, 'sam': {'use_sam_refinement': False, 'sam_backend': 'medsam', 'sam_checkpoint': './pretrained/medsam_vit_b.pth', 'sam_model_type': 'vit_b', 'auto_download': True, 'download_url': 'https://drive.google.com/uc?id=1ARiB5RkSsWmAB_8mqWnwkjHVy46vzkhR', 'sam_refine_interval': 20, 'use_multiplanar': True, 'use_propagation': False, 'min_component_area': 100, 'bbox_expand_ratio': 0.05, 'max_expansion_ratio': 1.5, 'feature_layer': '', 'visualize_refine': True, 'visualize_interval': 20, 'visualize_case_index': 0, 'visualize_slice_strategy': 'max_change', 'save_compare_npz': True, 'confidence_alpha': 0.5, 'confidence_temperature': 1.0, 'spatial_smooth_sigma': 2.0, 'use_fn_recovery': False, 'fn_recovery_start_epoch': 50, 'fn_recovery_interval': 100, 'fn_iou_threshold': 0.1, 'fn_similarity_threshold': 0.7, 'fn_consistency_slices': 3, 'prototype_update_interval': 5, 'sam_points_per_side': 32, 'sam_pred_iou_thresh': 0.86}, 'METHOD': {'ICT': {'ict_alpha': 0.2}, 'MT': None, 'UAMT': None, 'CPS': None, 'DAN': None, 'EM': None, 'Baseline': None, 'URPC': None, 'C3PS': {'stride': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 0.9, 'con_list': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 'addition_con_list': [], 'condition_group_mode': 'random', 'max_group_size': 3, 'con_groups': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, [2, 3], [12, 13], [8, 9], [5, 7], [1, 11], [4, 6, 10]], 'condition_mode': 'film', 'embed_dim': 8, 'cond_dim': 32, 'pseudo_filter_mode': 'confidence'}, 'SharedC3PS': {'stride': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 0.9, 'con_list': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13], 'addition_con_list': [], 'condition_group_mode': 'fixed', 'max_group_size': 3, 'con_groups': [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, [2, 3], [12, 13], [8, 9], [5, 7], [1, 11], [4, 6, 10]], 'condition_mode': 'film', 'embed_dim': 8, 'cond_dim': 32}, 'ConNet': {'stride': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 0.9, 'con_list': [1, 2, 3, 4, 5, 6, 7], 'addition_con_list': [8], 'condition_mode': 'film', 'embed_dim': 8, 'cond_dim': 32}, 'McNet': None, 'CVCL': {'stride': 8, 'step_save': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 0.9, 'con_list': [1, 2, 3, 4, 5, 6, 7], 'addition_con_list': [8], 'threshold': 0.5}, 'CVCL_partial': {'stride': 8, 'step_save': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 0.9, 'con_list': [1, 2, 3, 4, 5], 'addition_con_list': [8], 'threshold': 0.5, 'began_partial': 4000}, 'CSSR': {'stride': 2, 'iou_bound_low': 0.1, 'iou_bound_high': 1.01, 'patch_size_large': [128, 256, 256]}, 'CTCT': {'cache_mode': 'part', 'zip': True, 'accumulation_steps': None, 'use_checkpoint': False, 'amp_opt_level': 'O1', 'tag': None, 'eval': False, 'throughput': False}, 'CAML': None}, 'DATASET': {'labeled_num': 5, 'labeled_num_pl': 60, 'labeled_bs': 1, 'batch_size': 2, 'patch_size': [96, 160, 160], 'cutout': True, 'rotate_trans': True, 'scale_trans': True, 'random_rotflip': False, 'edge_prob': 0.1, 'normalization': 'Zscore', 'LA': {'num_classes': 2, 'class_name_list': ['LA'], 'weights': [1.0], 'train_list': '/projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_train.txt', 'train_list_pl': '/projects/weilab/liupeng/dataset/ssl_seg/LA/test.txt', 'test_list': '/projects/weilab/liupeng/dataset/ssl_seg/LA/TrainingSet/LA_test.txt', 'training_data_num': 80, 'testing_data_num': 20, 'cut_upper': 300, 'cut_lower': -200}, 'MMWHS': {'num_classes': 8, 'class_name_list': ['MYO', 'LA', 'LV', 'RA', 'AA', 'PA', 'RV', 'Foreground'], 'weights': [1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0], 'train_list': '/projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_train.txt', 'train_list_pl': '../data/Pancreas/pancreas_test.txt', 'test_list': '/projects/weilab/liupeng/dataset/ssl_seg/Task012_Heart/MMWHS_test.txt', 'training_data_num': 14, 'testing_data_num': 6, 'cut_upper': 300, 'cut_lower': -200}, 'MMWHS_MR': {'num_classes': 8, 'train_list': '../data/MMWHS_MR/train.txt', 'test_list': '../data/MMWHS_MR/test.txt', 'training_data_num': 14, 'testing_data_num': 6, 'cut_upper': 1000, 'cut_lower': -1000}, 'BCV': {'num_classes': 6, 'class_name_list': ['Spleen', 'Right_Kidney', 'Left_Kidney', 'Liver', 'Pancreas', 'Foreground'], 'weights': [1.0, 1.0, 1.0, 1.0, 1.0], 'train_list': '/projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/train.txt', 'train_list_pl': '/projects/weilab/liupeng/dataset/ssl_seg/Pancreas/pancreas_test.txt', 'test_list': '/projects/weilab/liupeng/dataset/ssl_seg/Task11_BCV/test.txt', 'training_data_num': 24, 'testing_data_num': 6, 'cut_upper': 275, 'cut_lower': -125}, 'BTCV': {'num_classes': 14, 'class_name_list': ['Spleen', 'Right_Kidney', 'Left_Kidney', 'Gallbladder', 'Esophagus', 'Liver', 'Stomach', 'Aorta', 'Inferior_Vena_Cava', 'Portal_Vein_And_Splenic_Vein', 'Pancreas', 'Right_Adrenal_Gland', 'Left_Adrenal_Gland', 'Foreground'], 'weights': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1], 'train_list': '/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/train.txt', 'train_list_pl': '/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt', 'test_list': '/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/test.txt', 'training_data_num': 18, 'testing_data_num': 12, 'cut_upper': 275, 'cut_lower': -125}, 'FLARE': {'num_classes': 5, 'weights': [1.0, 1.0, 1.0, 1.0], 'class_name_list': ['Liver', 'Kidney', 'Spleen', 'Pancreas', 'Foreground'], 'train_list': '../data/AbdomenCT-1K/Flare_train.txt', 'test_list': '../data/AbdomenCT-1K/Flare_test.txt', 'train_list_pl': '../data/Pancreas/pancreas_test.txt', 'training_data_num': 200, 'testing_data_num': 161, 'cut_upper': 275, 'cut_lower': -125}, 'FLARE_FR': {'num_classes': 5, 'weights': [1.0, 1.0, 1.0, 1.0], 'class_name_list': ['Liver', 'Kidney', 'Spleen', 'Pancreas', 'Foreground'], 'train_list': '../data/AbdomenCT-1K/Flare_train_fullres.txt', 'test_list': '../data/AbdomenCT-1K/Flare_test_fullres.txt', 'train_list_pl': '../data/Pancreas/pancreas_test.txt', 'training_data_num': 200, 'testing_data_num': 161, 'cut_upper': 275, 'cut_lower': -125}, 'FLARE_MR': {'num_classes': 5, 'weights': [1.0, 1.0, 1.0, 1.0], 'class_name_list': ['Liver', 'Kidney', 'Spleen', 'Pancreas', 'Foreground'], 'train_list': '../data/AbdomenCT-1K/Flare_train_midres.txt', 'test_list': '../data/AbdomenCT-1K/Flare_test_midres.txt', 'train_list_pl': '../data/Pancreas/pancreas_test.txt', 'training_data_num': 200, 'testing_data_num': 161, 'cut_upper': 275, 'cut_lower': -125}}, 'model': {'name': 'Semi3DUNet', 'in_channels': 1, 'out_channels': 8, 'layer_order': 'gcr', 'f_maps': 16, 'num_levels': 5, 'num_groups': 8, 'final_sigmoid': False, 'is_segmentation': True}}
+Using class DATASETSEMI **********
+total img:18
+lower:-125,upper:275
+do affine:True, do cutout:True
+condition list:[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+Using class DATASETSEMI **********
+C3PS fixed-epoch mode: 100 iters/epoch x 500 epochs => max_iterations=50000
+================> Training C3PS<===============
+iteration 1 :model1 loss : 1.987080model2 loss : 0.694449pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 20 :model1 loss : 1.257600model2 loss : 0.285877pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 20: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_20_dice_0.0349
+iteration 20 : model_dice_score : 0.034852 model_hd95 : 0.000000
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0004.npy
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:1, metric:[0. 0. 0.]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[0. 0. 0.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:5, metric:[0. 0. 0.]
+condition:6, metric:[0. 0. 0.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0. 0. 0.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[0. 0. 0.]
+condition batch eval, img shape:(210, 203, 203), sx:3, sy:2, sz:2, num_conditions:1
+condition:13, metric:[0. 0. 0.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0001.npy
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[  0. 150. 150.]
+condition:2, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[  0. 150. 150.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[  0. 150. 150.]
+condition:8, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[  0. 150. 150.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0002.npy
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[  0. 150. 150.]
+condition:2, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[  0. 150. 150.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[  0. 150. 150.]
+condition:8, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[  0. 150. 150.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0038.npy
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0. 0. 0.]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:5, metric:[0. 0. 0.]
+condition:6, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[0. 0. 0.]
+condition batch eval, img shape:(250, 333, 333), sx:4, sy:4, sz:4, num_conditions:1
+condition:13, metric:[0. 0. 0.]
+Validation end
+avg metric shape: (13, 3)
+iteration 20 : model2_dice_score : 0.000000 model2_hd95 : 77.884615
+iteration 40 :model1 loss : 0.795048model2 loss : 0.253051pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 60 :model1 loss : 0.659896model2 loss : 0.248264pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 80 :model1 loss : 0.681838model2 loss : 0.263109pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 100 :model1 loss : 0.695628model2 loss : 0.260305pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 120 :model1 loss : 0.648824model2 loss : 0.245456pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 140 :model1 loss : 0.652459model2 loss : 0.256370pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 160 :model1 loss : 0.590593model2 loss : 0.246871pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 180 :model1 loss : 0.687717model2 loss : 0.274842pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 200 :model1 loss : 0.578823model2 loss : 0.245786pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_200.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_200.pth
+iteration 220 :model1 loss : 0.648574model2 loss : 0.248862pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 240 :model1 loss : 0.826741model2 loss : 0.271298pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 260 :model1 loss : 0.564631model2 loss : 0.233771pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 280 :model1 loss : 0.504899model2 loss : 0.190479pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 300 :model1 loss : 0.595052model2 loss : 0.242933pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 320 :model1 loss : 0.546244model2 loss : 0.242087pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 340 :model1 loss : 0.512279model2 loss : 0.264755pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 360 :model1 loss : 0.673764model2 loss : 0.234824pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 380 :model1 loss : 0.541293model2 loss : 0.262824pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 400 :model1 loss : 0.481446model2 loss : 0.244294pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_400.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_400.pth
+iteration 420 :model1 loss : 0.502461model2 loss : 0.207603pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 440 :model1 loss : 0.508775model2 loss : 0.251303pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 460 :model1 loss : 0.489467model2 loss : 0.218083pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 480 :model1 loss : 0.475471model2 loss : 0.250727pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 500 :model1 loss : 0.519155model2 loss : 0.249124pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 520 :model1 loss : 0.474624model2 loss : 0.200590pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 540 :model1 loss : 0.431540model2 loss : 0.221511pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 560 :model1 loss : 0.423484model2 loss : 0.231836pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 580 :model1 loss : 0.405596model2 loss : 0.240653pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 600 :model1 loss : 0.415064model2 loss : 0.253344pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_600.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_600.pth
+iteration 620 :model1 loss : 0.448360model2 loss : 0.210258pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 640 :model1 loss : 0.439985model2 loss : 0.249804pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 660 :model1 loss : 0.360868model2 loss : 0.198946pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 680 :model1 loss : 0.403156model2 loss : 0.239035pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 700 :model1 loss : 0.376823model2 loss : 0.262035pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 720 :model1 loss : 0.416924model2 loss : 0.247597pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 740 :model1 loss : 0.490752model2 loss : 0.251464pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 760 :model1 loss : 0.522062model2 loss : 0.237018pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 780 :model1 loss : 0.400204model2 loss : 0.213416pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 800 :model1 loss : 0.356876model2 loss : 0.236088pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_800.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_800.pth
+iteration 820 :model1 loss : 0.388187model2 loss : 0.257106pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 840 :model1 loss : 0.356998model2 loss : 0.166388pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 860 :model1 loss : 0.434496model2 loss : 0.186956pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 880 :model1 loss : 0.343451model2 loss : 0.266951pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 900 :model1 loss : 0.405807model2 loss : 0.256134pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 920 :model1 loss : 0.335507model2 loss : 0.253018pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 940 :model1 loss : 0.348239model2 loss : 0.226444pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 960 :model1 loss : 0.361096model2 loss : 0.213562pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 980 :model1 loss : 0.373404model2 loss : 0.258666pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1000 :model1 loss : 0.498698model2 loss : 0.259155pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_1000.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_1000.pth
+iteration 1020 :model1 loss : 0.335275model2 loss : 0.244002pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1040 :model1 loss : 0.403472model2 loss : 0.253735pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1060 :model1 loss : 0.334121model2 loss : 0.281478pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1080 :model1 loss : 0.398421model2 loss : 0.263954pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1100 :model1 loss : 0.372125model2 loss : 0.281998pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1120 :model1 loss : 0.328988model2 loss : 0.228335pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1140 :model1 loss : 0.423207model2 loss : 0.221450pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1160 :model1 loss : 0.331168model2 loss : 0.218667pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1180 :model1 loss : 0.343224model2 loss : 0.260657pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1200 :model1 loss : 0.332745model2 loss : 0.169339pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_1200.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_1200.pth
+iteration 1220 :model1 loss : 0.330825model2 loss : 0.227974pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1240 :model1 loss : 0.340403model2 loss : 0.219215pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1260 :model1 loss : 0.307659model2 loss : 0.248508pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1280 :model1 loss : 0.375141model2 loss : 0.258070pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1300 :model1 loss : 0.448134model2 loss : 0.245600pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1320 :model1 loss : 0.276607model2 loss : 0.212243pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1340 :model1 loss : 0.341970model2 loss : 0.269755pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1360 :model1 loss : 0.458919model2 loss : 0.240288pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1380 :model1 loss : 0.296208model2 loss : 0.215569pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1400 :model1 loss : 0.275507model2 loss : 0.249150pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_1400.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_1400.pth
+iteration 1420 :model1 loss : 0.307730model2 loss : 0.264493pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1440 :model1 loss : 0.332303model2 loss : 0.206754pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1460 :model1 loss : 0.284775model2 loss : 0.121093pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1480 :model1 loss : 0.333710model2 loss : 0.285417pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1500 :model1 loss : 0.286858model2 loss : 0.245275pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1520 :model1 loss : 0.388732model2 loss : 0.217645pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1540 :model1 loss : 0.308047model2 loss : 0.234864pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1560 :model1 loss : 0.347140model2 loss : 0.258344pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1580 :model1 loss : 0.327566model2 loss : 0.255148pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1600 :model1 loss : 0.266682model2 loss : 0.197799pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_1600.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_1600.pth
+iteration 1620 :model1 loss : 0.292153model2 loss : 0.258750pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1640 :model1 loss : 0.263722model2 loss : 0.185297pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1660 :model1 loss : 0.270564model2 loss : 0.227079pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1680 :model1 loss : 0.296634model2 loss : 0.211835pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1700 :model1 loss : 0.260766model2 loss : 0.202411pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1720 :model1 loss : 0.269255model2 loss : 0.246388pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1740 :model1 loss : 0.299228model2 loss : 0.238665pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1760 :model1 loss : 0.320978model2 loss : 0.303057pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1780 :model1 loss : 0.286879model2 loss : 0.135741pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1800 :model1 loss : 0.405944model2 loss : 0.245722pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_1800.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_1800.pth
+iteration 1820 :model1 loss : 0.255962model2 loss : 0.208758pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1840 :model1 loss : 0.404568model2 loss : 0.257699pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1860 :model1 loss : 0.356419model2 loss : 0.247816pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1880 :model1 loss : 0.257682model2 loss : 0.201368pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1900 :model1 loss : 0.259262model2 loss : 0.250511pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1920 :model1 loss : 0.268550model2 loss : 0.151059pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1940 :model1 loss : 0.348210model2 loss : 0.166569pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1960 :model1 loss : 0.331003model2 loss : 0.264105pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 1980 :model1 loss : 0.295112model2 loss : 0.257508pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2000 :model1 loss : 0.277496model2 loss : 0.230903pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_2000.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_2000.pth
+iteration 2020 :model1 loss : 0.246593model2 loss : 0.234583pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2040 :model1 loss : 0.240526model2 loss : 0.248960pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2060 :model1 loss : 0.311645model2 loss : 0.218711pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2080 :model1 loss : 0.256257model2 loss : 0.257756pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2100 :model1 loss : 0.311681model2 loss : 0.189195pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2120 :model1 loss : 0.395171model2 loss : 0.178077pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2140 :model1 loss : 0.309847model2 loss : 0.260029pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2160 :model1 loss : 0.309054model2 loss : 0.240952pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2180 :model1 loss : 0.288075model2 loss : 0.205168pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2200 :model1 loss : 0.217549model2 loss : 0.262938pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_2200.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_2200.pth
+iteration 2220 :model1 loss : 0.210879model2 loss : 0.249812pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2240 :model1 loss : 0.265369model2 loss : 0.151439pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2260 :model1 loss : 0.233938model2 loss : 0.181605pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2280 :model1 loss : 0.319273model2 loss : 0.184398pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2300 :model1 loss : 0.222986model2 loss : 0.248268pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2320 :model1 loss : 0.305332model2 loss : 0.146579pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2340 :model1 loss : 0.258279model2 loss : 0.287716pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2360 :model1 loss : 0.381463model2 loss : 0.154991pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2380 :model1 loss : 0.213624model2 loss : 0.153116pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2400 :model1 loss : 0.216109model2 loss : 0.204440pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 2400: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_2400_dice_0.5376
+iteration 2400 : model_dice_score : 0.537567 model_hd95 : 17.307692
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0002.npy
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.43228149 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.07075755 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.68093559 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.07610678 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[  0. 150. 150.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0029.npy
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.34992319 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.67894063 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.20836268 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0035.npy
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.05299005 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.59920714 0.         0.        ]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:9, metric:[  0. 150. 150.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0032.npy
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.13872038 0.         0.        ]
+condition:2, metric:[0.04167127 0.         0.        ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.0837919 0.        0.       ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.62545714 0.         0.        ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.04988635 0.         0.        ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_2400_dice_0.0786
+iteration 2400 : model2_dice_score : 0.078635 model2_hd95 : 77.884615
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_2400.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_2400.pth
+iteration 2420 :model1 loss : 0.241483model2 loss : 0.266871pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2440 :model1 loss : 0.203612model2 loss : 0.235333pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2460 :model1 loss : 0.242581model2 loss : 0.203697pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2480 :model1 loss : 0.220025model2 loss : 0.247857pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2500 :model1 loss : 0.213162model2 loss : 0.167319pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2520 :model1 loss : 0.234042model2 loss : 0.179134pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2540 :model1 loss : 0.261874model2 loss : 0.253016pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2560 :model1 loss : 0.226954model2 loss : 0.266647pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2580 :model1 loss : 0.208408model2 loss : 0.190340pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2600 :model1 loss : 0.300890model2 loss : 0.187702pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_2600.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_2600.pth
+iteration 2620 :model1 loss : 0.302559model2 loss : 0.243656pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2640 :model1 loss : 0.235078model2 loss : 0.137881pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2660 :model1 loss : 0.276986model2 loss : 0.265771pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2680 :model1 loss : 0.215275model2 loss : 0.150386pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2700 :model1 loss : 0.243544model2 loss : 0.257334pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2720 :model1 loss : 0.229927model2 loss : 0.180257pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2740 :model1 loss : 0.240091model2 loss : 0.230351pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2760 :model1 loss : 0.202450model2 loss : 0.218749pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2780 :model1 loss : 0.244342model2 loss : 0.219102pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2800 :model1 loss : 0.210329model2 loss : 0.183093pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 2800: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_2800_dice_0.6202
+iteration 2800 : model_dice_score : 0.620183 model_hd95 : 11.538462
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0029.npy
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.35307144 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.60423614 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.65443038 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0.02835501 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0036.npy
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.17779105 0.         0.        ]
+condition:2, metric:[0.00572056 0.         0.        ]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.00305428 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.49239932 0.         0.        ]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.2925109 0.        0.       ]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.00191251 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(276, 255, 255), sx:4, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0002.npy
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.30975041 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.12067501 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.61065727 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.43005525 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.18741282 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0022.npy
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.32057545 0.         0.        ]
+condition:2, metric:[0.00830082 0.         0.        ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.44816624 0.         0.        ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.58005075 0.         0.        ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.16581741 0.         0.        ]
+condition:10, metric:[0. 0. 0.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_2800_dice_0.1114
+iteration 2800 : model2_dice_score : 0.111441 model2_hd95 : 57.692308
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_2800.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_2800.pth
+iteration 2820 :model1 loss : 0.255705model2 loss : 0.256142pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2840 :model1 loss : 0.237159model2 loss : 0.254785pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2860 :model1 loss : 0.282276model2 loss : 0.229437pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2880 :model1 loss : 0.235059model2 loss : 0.268068pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2900 :model1 loss : 0.223595model2 loss : 0.248864pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2920 :model1 loss : 0.369534model2 loss : 0.262335pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2940 :model1 loss : 0.221035model2 loss : 0.174357pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2960 :model1 loss : 0.238711model2 loss : 0.251465pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 2980 :model1 loss : 0.297173model2 loss : 0.236233pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3000 :model1 loss : 0.257353model2 loss : 0.244804pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_3000.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_3000.pth
+iteration 3020 :model1 loss : 0.195922model2 loss : 0.208104pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3040 :model1 loss : 0.212688model2 loss : 0.236628pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3060 :model1 loss : 0.250364model2 loss : 0.187758pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3080 :model1 loss : 0.325513model2 loss : 0.240528pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3100 :model1 loss : 0.221998model2 loss : 0.196008pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3120 :model1 loss : 0.259315model2 loss : 0.218406pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3140 :model1 loss : 0.439288model2 loss : 0.237208pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3160 :model1 loss : 0.256977model2 loss : 0.251438pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3180 :model1 loss : 0.294685model2 loss : 0.233487pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3200 :model1 loss : 0.284496model2 loss : 0.214545pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 3200: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+iteration 3200 : model_dice_score : 0.541270 model_hd95 : 14.423077
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0029.npy
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.1023758 0.        0.       ]
+condition:2, metric:[0.11849376 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0.15480943 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.45410961 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.63472118 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0.10129341 0.         0.        ]
+condition:10, metric:[0. 0. 0.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0025.npy
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.0048367 0.        0.       ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.25540343 0.         0.        ]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0.00174159 0.         0.        ]
+condition:8, metric:[0.21504945 0.         0.        ]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.00066247 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0035.npy
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.05360651 0.         0.        ]
+condition:2, metric:[0.00857252 0.         0.        ]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.42377004 0.         0.        ]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.50438575 0.         0.        ]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0.10428857 0.         0.        ]
+condition:10, metric:[0. 0. 0.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(235, 314, 314), sx:4, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0022.npy
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.10871489 0.         0.        ]
+condition:2, metric:[0.10858745 0.         0.        ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.2720624 0.        0.       ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.61923775 0.         0.        ]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.247259 0.       0.      ]
+condition:10, metric:[0. 0. 0.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 262, 262), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+Validation end
+avg metric shape: (13, 3)
+iteration 3200 : model2_dice_score : 0.086423 model2_hd95 : 51.923077
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_3200.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_3200.pth
+iteration 3220 :model1 loss : 0.206165model2 loss : 0.214990pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3240 :model1 loss : 0.196562model2 loss : 0.219619pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3260 :model1 loss : 0.236100model2 loss : 0.206551pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3280 :model1 loss : 0.197861model2 loss : 0.242696pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3300 :model1 loss : 0.481352model2 loss : 0.267099pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3320 :model1 loss : 0.319415model2 loss : 0.246021pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3340 :model1 loss : 0.233743model2 loss : 0.153083pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3360 :model1 loss : 0.209294model2 loss : 0.203199pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3380 :model1 loss : 0.199753model2 loss : 0.223829pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3400 :model1 loss : 0.180367model2 loss : 0.243319pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_3400.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_3400.pth
+iteration 3420 :model1 loss : 0.236361model2 loss : 0.216202pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3440 :model1 loss : 0.202897model2 loss : 0.247210pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3460 :model1 loss : 0.207878model2 loss : 0.218596pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3480 :model1 loss : 0.181296model2 loss : 0.240699pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3500 :model1 loss : 0.240161model2 loss : 0.173798pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3520 :model1 loss : 0.219413model2 loss : 0.201628pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3540 :model1 loss : 0.192828model2 loss : 0.219579pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3560 :model1 loss : 0.218794model2 loss : 0.258199pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3580 :model1 loss : 0.219353model2 loss : 0.269716pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3600 :model1 loss : 0.316049model2 loss : 0.205215pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 3600: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+iteration 3600 : model_dice_score : 0.590114 model_hd95 : 0.000000
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0001.npy
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.32195892 0.         0.        ]
+condition:2, metric:[0.14834356 0.         0.        ]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.226276 0.       0.      ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.63691694 0.         0.        ]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.26605657 0.         0.        ]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.0133017 0.        0.       ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(220, 228, 228), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0025.npy
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.20883924 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.75101941 0.         0.        ]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.21644321 0.         0.        ]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(212, 284, 284), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0002.npy
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.2706774 0.        0.       ]
+condition:2, metric:[0.34138153 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.32069918 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.6398656 0.        0.       ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0.00156561 0.         0.        ]
+condition:8, metric:[0.26224294 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.00640306 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0029.npy
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.27178002 0.         0.        ]
+condition:2, metric:[0.09047957 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0.16236222 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.70093693 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0.01524355 0.         0.        ]
+condition:8, metric:[0.52790116 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0.10348284 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:11, metric:[0. 0. 0.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_3600_dice_0.1251
+iteration 3600 : model2_dice_score : 0.125080 model2_hd95 : 66.346154
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_3600.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_3600.pth
+iteration 3620 :model1 loss : 0.178181model2 loss : 0.250752pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3640 :model1 loss : 0.181194model2 loss : 0.249088pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3660 :model1 loss : 0.179748model2 loss : 0.239150pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3680 :model1 loss : 0.177826model2 loss : 0.245746pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3700 :model1 loss : 0.260236model2 loss : 0.246645pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3720 :model1 loss : 0.193388model2 loss : 0.250275pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3740 :model1 loss : 0.182031model2 loss : 0.247648pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3760 :model1 loss : 0.478016model2 loss : 0.265567pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3780 :model1 loss : 0.204165model2 loss : 0.236683pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3800 :model1 loss : 0.200105model2 loss : 0.180336pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_3800.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_3800.pth
+iteration 3820 :model1 loss : 0.300098model2 loss : 0.112345pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3840 :model1 loss : 0.187990model2 loss : 0.245431pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3860 :model1 loss : 0.347711model2 loss : 0.147474pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3880 :model1 loss : 0.245184model2 loss : 0.148385pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3900 :model1 loss : 0.272141model2 loss : 0.220709pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3920 :model1 loss : 0.255321model2 loss : 0.249329pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3940 :model1 loss : 0.366699model2 loss : 0.268984pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3960 :model1 loss : 0.180137model2 loss : 0.240002pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 3980 :model1 loss : 0.188886model2 loss : 0.124811pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+iteration 4000 :model1 loss : 0.202920model2 loss : 0.218055pseudo_supervision1 : 0.000000pseudo_supervision2 : 0.000000
+began evaluation!
+iteration 4000: validation sampled 4/12 cases
+Total test images: 4
+Validation begin
+Validation end
+avg metric shape: (13, 3)
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/iter_4000_dice_0.6287
+iteration 4000 : model_dice_score : 0.628684 model_hd95 : 0.000000
+began evaluation!
+Total test images: 4
+Validation begin
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0029.npy
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:1, metric:[0.20297175 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:3, metric:[0.06628512 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.76038806 0.         0.        ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.412684 0.       0.      ]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:9, metric:[0.0104105 0.        0.       ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(150, 299, 299), sx:2, sy:4, sz:4, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0032.npy
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.0981844 0.        0.       ]
+condition:2, metric:[0.1366717 0.        0.       ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.21548803 0.         0.        ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.71434516 0.         0.        ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.23213228 0.         0.        ]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(216, 253, 253), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0008.npy
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.12285905 0.         0.        ]
+condition:2, metric:[0. 0. 0.]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0. 0. 0.]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.76930566 0.         0.        ]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.20498518 0.         0.        ]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0.01732738 0.         0.        ]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(222, 249, 249), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+===>test image:/projects/weilab/liupeng/dataset/ssl_seg/BTCV/Training_resampled_1.5_1.5_2.0_npy_zscore/img/img0002.npy
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:1, metric:[0.1684356 0.        0.       ]
+condition:2, metric:[0.02287486 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:3, metric:[0.2186076 0.        0.       ]
+condition:4, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:5, metric:[  0. 150. 150.]
+condition:6, metric:[0.6885725 0.        0.       ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:7, metric:[0. 0. 0.]
+condition:8, metric:[0.18100649 0.         0.        ]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:9, metric:[0. 0. 0.]
+condition:10, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:2
+condition:11, metric:[  0. 150. 150.]
+condition:12, metric:[  0. 150. 150.]
+condition batch eval, img shape:(208, 246, 246), sx:3, sy:3, sz:3, num_conditions:1
+condition:13, metric:[  0. 150. 150.]
+Validation end
+avg metric shape: (13, 3)
+iteration 4000 : model2_dice_score : 0.100837 model2_hd95 : 69.230769
+save model to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model_iter_4000.pth
+save model2 to ../model/BTCV_5_C3PS_c3ps_confidence_filter_semi-began4000_8000_SGD_SGD/unet_3D_old/model2_iter_4000.pth
+[1;34mwandb[0m: 
+[1;34mwandb[0m: 🚀 View run [33mBTCV_C3PS_labeled5_SGD_SGD_c3ps_confidence_filter_semi-began4000_8000[0m at: [34mhttps://wandb.ai/luckiepeng/semi-supervised-segmentation/runs/nravep7q[0m
+[1;34mwandb[0m: Find logs at: [1;35mwandb/run-20260321_162743-nravep7q/logs[0m
+Discord command not found, skipping notification

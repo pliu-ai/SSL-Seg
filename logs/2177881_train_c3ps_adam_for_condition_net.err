@@ -1317,4 +1317,105 @@ wandb: 🚀 View run at https://wandb.ai/luckiepeng/semi-supervised-segmentation
  50%|█████     | 2/4 [00:34<00:34, 17.36s/it][A
  75%|███████▌  | 3/4 [00:52<00:17, 17.43s/it][A
 100%|██████████| 4/4 [01:09<00:00, 17.49s/it][A100%|██████████| 4/4 [01:09<00:00, 17.44s/it]
- 90%|██████████████████████▍  | 448/500 [21:21:30<2:40:40, 185.39s/it] 90%|██████████████████████▍  | 449/500 [21:23:41<2:23:44, 169.12s/it]
+ 90%|██████████████████████▍  | 448/500 [21:21:30<2:40:40, 185.39s/it] 90%|██████████████████████▍  | 449/500 [21:23:41<2:23:44, 169.12s/it] 90%|██████████████████████▌  | 450/500 [21:25:53<2:11:47, 158.15s/it] 90%|██████████████████████▌  | 451/500 [21:28:06<2:02:57, 150.56s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:14<00:43, 14.47s/it][A
+ 50%|█████     | 2/4 [00:27<00:27, 13.71s/it][A
+ 75%|███████▌  | 3/4 [00:45<00:15, 15.54s/it][A
+100%|██████████| 4/4 [01:01<00:00, 15.81s/it][A100%|██████████| 4/4 [01:01<00:00, 15.40s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:20<01:00, 20.16s/it][A
+ 50%|█████     | 2/4 [00:37<00:36, 18.44s/it][A
+ 75%|███████▌  | 3/4 [00:55<00:18, 18.50s/it][A
+100%|██████████| 4/4 [01:12<00:00, 17.86s/it][A100%|██████████| 4/4 [01:12<00:00, 18.21s/it]
+ 90%|██████████████████████▌  | 452/500 [21:32:33<2:28:27, 185.58s/it] 91%|██████████████████████▋  | 453/500 [21:34:44<2:12:26, 169.08s/it] 91%|██████████████████████▋  | 454/500 [21:36:53<2:00:30, 157.18s/it] 91%|██████████████████████▊  | 455/500 [21:39:05<1:52:10, 149.56s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:17<00:52, 17.50s/it][A
+ 50%|█████     | 2/4 [00:29<00:28, 14.28s/it][A
+ 75%|███████▌  | 3/4 [00:39<00:12, 12.10s/it][A
+100%|██████████| 4/4 [00:53<00:00, 13.22s/it][A100%|██████████| 4/4 [00:53<00:00, 13.49s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:18<00:55, 18.54s/it][A
+ 50%|█████     | 2/4 [00:35<00:34, 17.48s/it][A
+ 75%|███████▌  | 3/4 [00:43<00:13, 13.28s/it][A
+100%|██████████| 4/4 [01:00<00:00, 14.90s/it][A100%|██████████| 4/4 [01:00<00:00, 15.23s/it]
+ 91%|██████████████████████▊  | 456/500 [21:43:12<2:11:02, 178.68s/it] 91%|██████████████████████▊  | 457/500 [21:45:24<1:57:57, 164.60s/it] 92%|██████████████████████▉  | 458/500 [21:47:34<1:48:05, 154.42s/it] 92%|██████████████████████▉  | 459/500 [21:49:46<1:40:54, 147.67s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:11<00:35, 11.94s/it][A
+ 50%|█████     | 2/4 [00:26<00:27, 13.71s/it][A
+ 75%|███████▌  | 3/4 [00:41<00:14, 14.23s/it][A
+100%|██████████| 4/4 [00:54<00:00, 13.76s/it][A100%|██████████| 4/4 [00:54<00:00, 13.70s/it]
+
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:16<00:50, 16.78s/it][A
+ 50%|█████     | 2/4 [00:33<00:33, 16.54s/it][A
+ 75%|███████▌  | 3/4 [00:50<00:16, 16.81s/it][A
+100%|██████████| 4/4 [01:07<00:00, 16.95s/it][A100%|██████████| 4/4 [01:07<00:00, 16.86s/it]
+ 92%|███████████████████████  | 460/500 [21:54:00<1:59:43, 179.59s/it] 92%|███████████████████████  | 461/500 [21:56:14<1:47:41, 165.68s/it] 92%|███████████████████████  | 462/500 [21:58:28<1:38:55, 156.19s/it] 93%|███████████████████████▏ | 463/500 [22:00:41<1:32:10, 149.47s/it]
+  0%|          | 0/4 [00:00<?, ?it/s][A
+ 25%|██▌       | 1/4 [00:14<00:44, 14.90s/it][A 25%|██▌       | 1/4 [00:35<01:47, 35.72s/it]
+ 93%|███████████████████████▏ | 463/500 [22:03:29<1:45:45, 171.51s/it]
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 213, in <module>
+    trainer.train()
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 496, in train
+    self.iters_per_epoch,
+    ^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 852, in _train_C3PS
+    for c in group:
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/methods/c3ps.py", line 364, in train_C3PS
+    'train/Groundtruth_label',
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 550, in evaluation
+    test_num = self.testing_data_num
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/inference/val_3D.py", line 393, in test_all_case
+    total_metric[i-1, :] += calculate_metric(
+                            ^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/inference/val_3D.py", line 266, in calculate_metric
+    asd = metric.binary.asd(pred, gt)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/medpy/metric/binary.py", line 584, in asd
+    sds = __surface_distances(result, reference, voxelspacing, connectivity)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/medpy/metric/binary.py", line 1282, in __surface_distances
+    dt = distance_transform_edt(~reference_border, sampling=voxelspacing)
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/scipy/ndimage/_morphology.py", line 2580, in distance_transform_edt
+    _nd_image.euclidean_feature_transform(input, sampling, ft)
+KeyboardInterrupt
+Exception ignored in atexit callback: <function _MultiProcessingDataLoaderIter._clean_up_worker at 0x15546e3c67a0>
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1598, in _clean_up_worker
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/connection.py", line 1136, in wait
+    ready = selector.select(timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt: 
+Exception ignored in atexit callback: <function _MultiProcessingDataLoaderIter._clean_up_worker at 0x15546e3c67a0>
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/site-packages/torch/utils/data/dataloader.py", line 1598, in _clean_up_worker
+    w.join(timeout=_utils.MP_STATUS_CHECK_INTERVAL)
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/process.py", line 149, in join
+    res = self._popen.wait(timeout)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/popen_fork.py", line 40, in wait
+    if not wait([self.sentinel], timeout):
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/multiprocessing/connection.py", line 1136, in wait
+    ready = selector.select(timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/conda/envs/ssl_seg/lib/python3.12/selectors.py", line 415, in select
+    fd_event_list = self._selector.poll(timeout)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+KeyboardInterrupt: 

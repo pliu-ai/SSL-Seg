@@ -1,0 +1,251 @@
+DATASET:
+  CellMap:
+    class_name_list:
+    - ecs
+    - pm
+    - cyto
+    - mito_mem
+    - mito_lum
+    - mito_ribo
+    - golgi_mem
+    - golgi_lum
+    - ves_mem
+    - ves_lum
+    - endo_mem
+    - endo_lum
+    - lyso_mem
+    - lyso_lum
+    - ld_mem
+    - ld_lum
+    - er_mem
+    - er_lum
+    - eres_mem
+    - eres_lum
+    - ne_mem
+    - ne_lum
+    - np_out
+    - np_in
+    - hchrom
+    - echrom
+    - nucpl
+    - mt_out
+    - mt_in
+    - perox_mem
+    - perox_lum
+    cut_lower: -125
+    cut_upper: 275
+    num_classes: 32
+    test_list: /projects/weilab/liupeng/projects/frameworks/nnUNet/DATASET/nnUNet_preprocessed/Dataset200_Dataset101_CellMap_model_high_res/nnUNetPlans_3d_lowres_large_patch_test/test.txt
+    testing_data_num: 17
+    train_list: /projects/weilab/liupeng/projects/frameworks/nnUNet/DATASET/nnUNet_preprocessed/Dataset200_Dataset101_CellMap_model_high_res/nnUNetPlans_3d_lowres_large_patch/train_all.txt
+    train_list_pl: /projects/weilab/liupeng/projects/frameworks/nnUNet/DATASET/nnUNet_preprocessed/Dataset200_Dataset101_CellMap_model_high_res/nnUNetPlans_3d_lowres_large_patch_test/test.txt
+    training_data_num: 202
+    weights:
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+    - 1
+  batch_size: 2
+  cutout: false
+  edge_prob: 0.1
+  labeled_bs: 2
+  labeled_num: 202
+  labeled_num_pl: 17
+  normalization: Zscore
+  patch_size:
+  - 160
+  - 160
+  - 160
+  random_rotflip: false
+  rotate_trans: true
+  scale_trans: true
+  shuffle_train_list_like_magicnet: false
+METHOD:
+  CondBaseline:
+    addition_con_list: []
+    con_groups:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    con_list:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 5
+    - 6
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+    - 12
+    - 13
+    - 14
+    - 15
+    - 16
+    - 17
+    - 18
+    - 19
+    - 20
+    - 21
+    - 22
+    - 23
+    - 24
+    - 25
+    - 26
+    - 27
+    - 28
+    - 29
+    - 30
+    - 31
+    cond_dim: 32
+    condition_group_mode: random
+    condition_mode: film
+    embed_dim: 8
+    iou_bound_high: 0.9
+    iou_bound_low: 0.1
+    max_group_size: 3
+    stride: 2
+backbone: unet_3D_old
+backbone2: unet_3D_condtion_decoder
+began_condition_iter: 8000
+began_eval_iter: 2000
+began_semi_iter: 4000
+condition_eval_batch_size: 2
+consistency: 0.1
+consistency_rampup: 200.0
+consistency_type: mse
+continue_training: false
+continue_wandb: false
+current_iter_num: 0
+dataloader_num_workers: 8
+dataloader_persistent_workers: true
+dataloader_pin_memory: true
+dataloader_prefetch_factor: 2
+dataset_name: CellMap
+deterministic: 1
+ema_decay: 0.99
+exp: cond_baseline_cellmap_highres
+gpu: '0'
+initial2_lr: 0.01
+initial_lr: 0.01
+iters_per_epoch: 100
+lr_scheduler_eps: 0.001
+lr_scheduler_patience: 30
+max_iterations: 30000
+method: CondBaseline
+model:
+  f_maps: 16
+  final_sigmoid: false
+  in_channels: 1
+  is_segmentation: true
+  layer_order: gcr
+  name: Semi3DUNet
+  num_groups: 8
+  num_levels: 5
+  out_channels: 32
+model1_thresh: 0.9
+model2_checkpoint: ''
+model2_thresh: 0.95
+model_checkpoint: ''
+num_epochs: 300
+optimizer2_type: SGD
+optimizer_type: SGD
+sam:
+  auto_download: true
+  bbox_expand_ratio: 0.05
+  confidence_alpha: 0.5
+  confidence_temperature: 1.0
+  download_url: https://drive.google.com/uc?id=1ARiB5RkSsWmAB_8mqWnwkjHVy46vzkhR
+  feature_layer: ''
+  fn_consistency_slices: 3
+  fn_iou_threshold: 0.1
+  fn_recovery_interval: 100
+  fn_recovery_start_epoch: 50
+  fn_similarity_threshold: 0.7
+  max_expansion_ratio: 1.5
+  min_component_area: 100
+  prototype_update_interval: 5
+  sam_backend: medsam
+  sam_checkpoint: ./pretrained/medsam_vit_b.pth
+  sam_model_type: vit_b
+  sam_points_per_side: 32
+  sam_pred_iou_thresh: 0.86
+  sam_refine_interval: 20
+  save_compare_npz: true
+  spatial_smooth_sigma: 2.0
+  use_fn_recovery: false
+  use_multiplanar: true
+  use_propagation: false
+  use_sam_refinement: false
+  visualize_case_index: 0
+  visualize_interval: 20
+  visualize_refine: true
+  visualize_slice_strategy: max_change
+save_checkpoint_freq: 400
+seed: 1337
+show_img_freq: 1000
+train_3D: true
+train_log_interval: 20
+use_CAC: true
+use_PL: false
+val_freq: 400
+val_sample_num: 4
+wandb_id: ''
+weight_decay: 1.0e-05

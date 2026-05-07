@@ -137,7 +137,11 @@ def test_all_case_condition(net, test_list="full_test.list", num_classes=4,
     return mean_metric
 
 def main(args, config):
-    model = net_factory_3d("unet_3D_condition", in_chns=1, class_num=2).cuda()
+    method_cfg = config.get('METHOD', {}).get(config.get('method', ''), {})
+    cond_out_channels = int(method_cfg.get('cond_output_channels', 2))
+    model = net_factory_3d(
+        "unet_3D_condition", in_chns=1, class_num=cond_out_channels
+    ).cuda()
     model_state_dict = torch.load(config['model_checkpoint'])
     model.load_state_dict(model_state_dict)
     dataset_name = config['dataset_name']
@@ -172,7 +176,11 @@ if __name__ == "__main__":
     if os.path.exists(pred_save_path):
         shutil.rmtree(pred_save_path)
     os.makedirs(pred_save_path)
-    model = net_factory_3d("unet_3D_condtion_decoder", in_chns=1, class_num=2).cuda()
+    method_cfg = config.get('METHOD', {}).get(method_name, {})
+    cond_out_channels = int(method_cfg.get('cond_output_channels', 2))
+    model = net_factory_3d(
+        "unet_3D_condtion_decoder", in_chns=1, class_num=cond_out_channels
+    ).cuda()
     model.load_state_dict(torch.load(model_path, map_location="cuda:0"))
     test_list = dataset_config['test_list']
     patch_size = config['DATASET']['patch_size']

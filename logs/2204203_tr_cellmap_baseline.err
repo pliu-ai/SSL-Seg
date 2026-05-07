@@ -1,0 +1,9 @@
+cpu-bind=MASK - g015, task  0  0 [3306858]: mask 0x2fffe set
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 199, in <module>
+    trainer = SemiSupervisedTrainer3D(config=config, 
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/trainer/semi_trainer_3D.py", line 140, in __init__
+    self.method_config = config['METHOD'][self.method_name]
+                         ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+KeyError: 'Baseline'

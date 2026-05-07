@@ -258,18 +258,21 @@ class BCVDatasetCAC(dataset):
         shape = img_array.shape
         
         
-        """ get one hot of mask"""
+        """ get one hot of mask (or keep label indices for large num_class) """
         mask_array = torch.FloatTensor(mask_array).unsqueeze(0)
-        #print(f"unique value:{mask_array.unique()}")
         if task_id > 0 and task_id !=2:
             mask_array[mask_array!=0] = task_id
         if task_id == 2:
             mask_array[mask_array==2] = 3
             mask_array[mask_array==1] = 2
-        #print(f"img name:{img_name},task_name:{task_name},task id:{task_id},unique value:{mask_array.unique()}")
-        gt_onehot = torch.zeros((self.num_class, mask_array.shape[1], mask_array.shape[2],mask_array.shape[3]))
-        gt_onehot.scatter_(0, mask_array.long(), 1)
-        mask_array = gt_onehot     
+
+        # For task_id==0, one-hot + argmax is identity; skip it to save memory
+        # when num_class is large (e.g. CellMap with 32 classes).
+        self._use_onehot_crop = (task_id != 0)
+        if self._use_onehot_crop:
+            gt_onehot = torch.zeros((self.num_class, mask_array.shape[1], mask_array.shape[2],mask_array.shape[3]))
+            gt_onehot.scatter_(0, mask_array.long(), 1)
+            mask_array = gt_onehot
         
         """get image patch"""
         ul1 = br1 = ul2 = br2 =  []
@@ -356,15 +359,23 @@ class BCVDatasetCAC(dataset):
                         valid_bbox_y_lb2:valid_bbox_y_ub2,
                         valid_bbox_z_lb2:valid_bbox_z_ub2, ]
        
-        mask_array1 = mask_array[np.newaxis,:,valid_bbox_x_lb1:valid_bbox_x_ub1,
-                               valid_bbox_y_lb1:valid_bbox_y_ub1,
-                               valid_bbox_z_lb1:valid_bbox_z_ub1, ]
-        mask_array2 = mask_array[np.newaxis,:,valid_bbox_x_lb2:valid_bbox_x_ub2,
-                        valid_bbox_y_lb2:valid_bbox_y_ub2,
-                        valid_bbox_z_lb2:valid_bbox_z_ub2, ]
-        
-        mask_array1 = np.argmax(mask_array1, axis=1)
-        mask_array2 = np.argmax(mask_array2, axis=1)
+        if self._use_onehot_crop:
+            mask_array1 = mask_array[np.newaxis,:,valid_bbox_x_lb1:valid_bbox_x_ub1,
+                                   valid_bbox_y_lb1:valid_bbox_y_ub1,
+                                   valid_bbox_z_lb1:valid_bbox_z_ub1, ]
+            mask_array2 = mask_array[np.newaxis,:,valid_bbox_x_lb2:valid_bbox_x_ub2,
+                            valid_bbox_y_lb2:valid_bbox_y_ub2,
+                            valid_bbox_z_lb2:valid_bbox_z_ub2, ]
+            mask_array1 = np.argmax(mask_array1, axis=1)
+            mask_array2 = np.argmax(mask_array2, axis=1)
+        else:
+            mask_array1 = mask_array[:,valid_bbox_x_lb1:valid_bbox_x_ub1,
+                                   valid_bbox_y_lb1:valid_bbox_y_ub1,
+                                   valid_bbox_z_lb1:valid_bbox_z_ub1]
+            mask_array2 = mask_array[:,valid_bbox_x_lb2:valid_bbox_x_ub2,
+                            valid_bbox_y_lb2:valid_bbox_y_ub2,
+                            valid_bbox_z_lb2:valid_bbox_z_ub2]
+
         if self.cutout and index< self.labeled_num:
             mask_array1 = random_cutout(mask_array1[0], size=(4,4,4))
             mask_array2 = random_cutout(mask_array2[0], size=(4,4,4))

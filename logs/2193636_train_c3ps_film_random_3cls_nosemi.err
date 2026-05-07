@@ -1,0 +1,7 @@
+cpu-bind=MASK - g008, task  0  0 [2643224]: mask 0x2fffe00000000 set
+Traceback (most recent call last):
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 158, in <module>
+    sanitize_gpu_config(config)
+  File "/projects/weilab/liupeng/projects/semi-seg/SSL-Seg/train_semi-supervised.py", line 139, in sanitize_gpu_config
+    raise RuntimeError(
+RuntimeError: [GPU] no visible CUDA device. Please check CUDA driver/runtime and CUDA_VISIBLE_DEVICES.

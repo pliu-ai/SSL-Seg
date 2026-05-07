@@ -26,7 +26,8 @@ def _autocast_inference_context(device):
     return nullcontext()
 
 def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1, 
-                     condition=-1, do_SR=False, method='regular', return_scoremap=False):
+                     condition=-1, do_SR=False, method='regular',
+                     return_scoremap=False, condition_out_channels=2):
     w, h, d = image.shape
     print("do SR: ", do_SR)
 
@@ -60,8 +61,8 @@ def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1,
     sy = math.ceil((hh - patch_size[1]) / stride_xy) + 1
     sz = math.ceil((dd - patch_size[2]) / stride_z) + 1
     print(f"img shape:{image.shape}, sx:{sx}, sy:{sy}, sz:{sz}")
-    if condition>0:
-        score_map = np.zeros((2, ) + image.shape).astype(np.float32) 
+    if condition > 0:
+        score_map = np.zeros((condition_out_channels, ) + image.shape).astype(np.float32)
     else:
         score_map = np.zeros((num_classes, ) + image.shape).astype(np.float32)
     cnt = np.zeros(image.shape).astype(np.float32)
@@ -83,9 +84,9 @@ def test_single_case(net, image, stride_xy, stride_z, patch_size, num_classes=1,
                     test_patch = torch.from_numpy(test_patch).to(device)
 
                 with torch.inference_mode(), _autocast_inference_context(device):
-                    if condition>0:
-                        condition = torch.tensor([condition],dtype=torch.long, device=device)
-                        pred1 = net(test_patch, condition)
+                    if condition > 0:
+                        cond_tensor = torch.tensor([condition], dtype=torch.long, device=device)
+                        pred1 = net(test_patch, cond_tensor)
                     else:
                         pred1 = net(test_patch)
                         if len(pred1)>0 and isinstance(pred1, (tuple, list)):
@@ -122,6 +123,7 @@ def test_single_case_condition_batched(
     conditions,
     do_SR=False,
     return_scoremap=False,
+    condition_out_channels=2,
 ):
     w, h, d = image.shape
     device = next(net.parameters()).device
@@ -162,7 +164,10 @@ def test_single_case_condition_batched(
         f"sx:{sx}, sy:{sy}, sz:{sz}, num_conditions:{len(conditions)}"
     )
 
-    score_map = np.zeros((len(conditions), 2) + image.shape, dtype=np.float32)
+    score_map = np.zeros(
+        (len(conditions), condition_out_channels) + image.shape,
+        dtype=np.float32,
+    )
     cnt = np.zeros(image.shape, dtype=np.float32)
     condition_batch = torch.as_tensor(conditions, dtype=torch.long, device=device)
 
@@ -285,7 +290,8 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
                         normalization='Zscore',
                         test_all_cases=False,
                         selected_cases=None,
-                        condition_batch_size=1):
+                        condition_batch_size=1,
+                        condition_out_channels=None):
     if selected_cases is not None:
         image_list = list(selected_cases)
     elif os.path.isdir(test_list):
@@ -303,6 +309,12 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
         condition_list = con_list # for condition learning
     else:
         condition_list = [i for i in range(1,num_classes)]
+    if condition_out_channels is None:
+        condition_out_channels = getattr(getattr(net, "final", None), "out_channels", None)
+    if condition_out_channels is None:
+        condition_out_channels = getattr(getattr(net, "dec2_final", None), "out_channels", None)
+    if condition_out_channels is None:
+        condition_out_channels = 2
     #shuffle(condition_list)
     if selected_cases is None:
         shuffle(image_list)
@@ -367,14 +379,16 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
                     patch_size,
                     conditions=condition_chunk,
                     do_SR=do_SR,
+                    condition_out_channels=condition_out_channels,
                 )
                 for chunk_idx, condition in enumerate(condition_chunk):
                     prediction = predictions[chunk_idx]
+                    pred_target = (prediction == 1).astype(np.uint8)
                     if cal_metric:
                         if condition < num_classes:
-                            metric = calculate_metric(label == condition, prediction)
+                            metric = calculate_metric(label == condition, pred_target)
                         else:
-                            metric = calculate_metric(label > 0, prediction)
+                            metric = calculate_metric(label > 0, pred_target)
                         print(f"condition:{condition}, metric:{metric}")
                         total_metric[condition - 1, :] += metric
         else:
@@ -406,9 +420,14 @@ def test_all_case(net, test_list="full_test.list", num_classes=4,
                 sitk.WriteImage(pred_itk, prediction_save_path+image_name.replace(".nii.gz","_pred.nii.gz"))
             else:
                 save_name = join(prediction_save_path,image_name.replace(".npy","_pred.nii.gz"))
-                image_reader_writer = SimpleITKIO()
-                properties = load_pickle(image_path.replace(".npy",".pkl"))
-                image_reader_writer.write_seg(prediction, save_name, properties)
+                pkl_path = image_path.replace(".npy",".pkl")
+                if os.path.exists(pkl_path):
+                    image_reader_writer = SimpleITKIO()
+                    properties = load_pickle(pkl_path)
+                    image_reader_writer.write_seg(prediction, save_name, properties)
+                else:
+                    pred_itk = sitk.GetImageFromArray(prediction.astype(np.uint8))
+                    sitk.WriteImage(pred_itk, save_name)
 
     print("Validation end")
     if con_list:

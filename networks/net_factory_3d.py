@@ -10,7 +10,10 @@ from torch import nn
 from dynamic_network_architectures.architectures.unet import PlainConvUNet
 from dynamic_network_architectures.building_blocks.helper import get_matching_instancenorm, convert_dim_to_conv_op
 from networks.unet_3D import unet_3D
-from networks.unet_3D_condition import unet_3D_Condition,Unet3DConditionDecoder,Unet3DConditionBottom
+from networks.unet_3D_condition import (
+    unet_3D_Condition, Unet3DConditionDecoder, Unet3DConditionBottom,
+    SharedEncoderCondUNet3D,
+)
 from networks.vnet import VNet
 from networks.VoxResNet import VoxResNet
 from networks.attention_unet import Attention_UNet
@@ -32,7 +35,8 @@ def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2,
                    model_config=None, device=None, condition_noise=False,
                    large_patch_size=(108,208,288),
                    num_conditions=None, embed_dim=8,
-                   condition_mode='concat', cond_dim=32):
+                   condition_mode='concat', cond_dim=32,
+                   cond_out_classes=2):
     if net_type == "unet_3D":
         model_config['out_channels'] = class_num
         net = get_model(model_config)
@@ -78,6 +82,13 @@ def net_factory_3d(net_type="unet_3D", in_chns=1, class_num=2,
             n_classes=class_num, in_channels=in_chns,
             num_conditions=num_conditions, embed_dim=embed_dim,
             condition_mode=condition_mode, cond_dim=cond_dim,
+        ).to(device)
+    elif net_type == "shared_encoder_cond":
+        net = SharedEncoderCondUNet3D(
+            n_classes=class_num, in_channels=in_chns,
+            num_conditions=num_conditions, embed_dim=embed_dim,
+            condition_mode=condition_mode, cond_dim=cond_dim,
+            cond_out_classes=cond_out_classes,
         ).to(device)
     elif net_type == "DAN":
         net = FC3DDiscriminator(num_classes=class_num).to(device)
